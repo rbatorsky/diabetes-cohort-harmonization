@@ -1,0 +1,2 @@
+Example usage on HPC:
+python 00_generate_harmonize_ffq.py --manifest /cluster/tufts/patralab/rbator01/aiml_ordovas_project/data/ffq_data_manifest.xlsx --output_dir /cluster/tufts/patralab/rbator01/aiml_ordovas_project/data/hmz_output/
