@@ -1,0 +1,526 @@
+﻿source_variable_bprhs_v1,source_variable_bprhs_v2,source_variable_bprhs_v3,source_variable_bprhs_v4,source_variable_prospect
+sysbp,sysbp_2yr  ,sysbp_5yr  ,bld_8yr  ,bld2
+diasbp,diasbp_2yr  ,diasbp_5yr  ,sysbp_8yr  ,bpsys_avg
+wt_kg,wt_kg_2yr  ,wt_kg_5yr  ,diasbp_8yr  ,bpdias_avg
+bmi,bmi_2yr  ,bmi_5yr  ,wt_kg_8yr  ,wt_avg
+hip,hip_2yr  ,chol_5yr  ,bmi_8yr  ,bmi
+chol,chol_2yr  ,ldl_5yr  ,ldl_8yr  ,hc_avg
+ldl,ldl_2yr  ,hdl_5yr  ,hdl_8yr  ,lab1
+hdl,hdl_2yr  ,trig_5yr  ,trig_8yr  ,lab2
+trig,trig_2yr  ,gluc_5yr  ,gluc_8yr  ,lab3
+gluc,gluc_2yr  ,glyhgb_5yr  ,insulin_8yr  ,lab4
+glyhgb  ,glyhgb_2yr  ,bun_5yr  ,crp_8yr  ,lab5
+bun  ,bun_2yr  ,creat_5yr  ,ant2a_8yr  ,lab6
+creat  ,creat_2yr  ,alb_5yr  ,ant3_8yr  ,lab17
+alb  ,alb_2yr  ,insulin_5yr  ,ht_m_8yr  ,lab18
+insulin  ,insulin_2yr  ,crp_5yr  ,waist_8yr  ,lab19
+crp  ,crp_2yr  ,platcount_adj_5yr  ,med1_8yr  ,lab28
+platcount_adj  ,platcount_adj_2yr  ,ant2a_5yr  ,med1b_8yr  ,lab37
+ant2a  ,ant2a_2yr  ,ant2b_5yr  ,med1d_8yr  ,lab38
+ant2b  ,ant2b_2yr  ,ant3_5yr  ,med1c_8yr  ,lab12
+ant3  ,ant3_2yr  ,ht_m_5yr  ,med2_8yr  ,lab14
+ht_m  ,ht_m_2yr  ,waist_5yr  ,med2b_8yr  ,lab11
+waist  ,waist_2yr  ,med1g_5yr  ,med2c_8yr  ,ant3a
+med1  ,med1x_2yr  ,med1age_5yr  ,med3_8yr  ,ant3b
+med1b  ,med1b_2yr  ,med3x_5yr  ,med3b_8yr  ,ant3c
+med1c  ,med1c_2yr  ,med3c_5yr  ,med3c_8yr  ,ht_avg
+med2  ,med2x_2yr  ,med6x_5yr  ,med7_2_8yr  ,wc_avg
+med2b  ,med2b_2yr  ,med6c_5yr  ,med7_2b_8yr  ,med1
+med2c  ,med2c_2yr  ,med7x_5yr  ,med7_2c_8yr  ,med1a
+med3  ,med3_2yr  ,med7c_5yr  ,med6_8yr  ,med1c
+med3b  ,med3b_2yr  ,med8x_5yr  ,med6b_8yr  ,med1d
+med3c  ,med3c_2yr  ,med8c_5yr  ,med6c_8yr  ,med3
+med6  ,med6x_2yr  ,med11x_5yr  ,med7_3_8yr  ,med3a
+med6b  ,med6b_2yr  ,med11c_5yr  ,med8b_8yr  ,med3d
+med6c  ,med6c_2yr  ,med21x_5yr  ,med8c_8yr  ,med4
+med7  ,med7x_2yr  ,med21t_5yr  ,med11_8yr  ,med4a
+med7b  ,med7b_2yr  ,med21c_5yr  ,med11b_8yr  ,med4d
+med7c  ,med7c_2yr  ,med15x_5yr  ,med21_8yr  ,med7
+med8  ,med8x_2yr  ,med15c_5yr  ,med21t_8yr  ,med7a
+med8b  ,med8b_2yr  ,med4x_5yr  ,med21b_8yr  ,med7d
+med8c  ,med8c_2yr  ,med4c_5yr  ,med21c_8yr  ,med8
+med11  ,med11x_2yr  ,med5x_5yr  ,med15_8yr  ,med8a
+med11b  ,med11b_2yr  ,med5c_5yr  ,med15t_8yr___16  ,med8d
+med11c  ,med11c_2yr  ,med9x_5yr  ,med15t_8yr___4  ,med9
+med4  ,med15c_2yr  ,med9c_5yr  ,med15t_8yr___5  ,med14a
+med4b  ,med4x_2yr  ,med12x_5yr  ,med15t_8yr___1  ,med14d
+med4c  ,med4b_2yr  ,med12c_5yr  ,med15t_8yr___25  ,med19
+med5  ,med4c_2yr  ,med16x_5yr  ,med15t_8yr___2  ,med19a
+med5b  ,med5x_2yr  ,med16c_5yr  ,med15t_8yr___18  ,med21
+med5c  ,med5b_2yr  ,med17x_5yr  ,med15t_8yr___19  ,med21e___1
+med9  ,med5c_2yr  ,med17c_5yr  ,med15t_8yr___3  ,med21e___2
+med9b  ,med9x_2yr  ,med18x_5yr  ,med15t_8yr___14  ,med21e___3
+med9c  ,med9b_2yr  ,med18c_5yr  ,med15t_8yr___6  ,med21a
+med12  ,med9c_2yr  ,fhx1a_5yr  ,med15t_8yr___22  ,med21d
+med12b  ,med12x_2yr  ,fhx1b_5yr  ,med15t_8yr___24  ,med26
+med12c  ,med12b_2yr  ,fhx1c_5yr  ,med15t_8yr___15  ,med26e___1
+med16  ,med12c_2yr  ,fhx1d_5yr  ,med15t_8yr___28  ,med26e___2
+med16b  ,med16_2yr  ,fhx2a_5yr  ,med15b_8yr  ,med26e___3
+med16c  ,med16b_2yr  ,fhx2b_5yr  ,med15c_8yr  ,med26e___4
+med17  ,med16c_2yr  ,fhx2c_5yr  ,med4_8yr  ,med26e___5
+med17b  ,med17_2yr  ,fhx2d_5yr  ,med4b_8yr  ,med26e___6
+med17c  ,med17b_2yr  ,fhx4a_5yr  ,med4c_8yr  ,med26e___7
+med18  ,med17c_2yr  ,fhx4b_5yr  ,med5_8yr  ,med26e___8
+med18b  ,med18_2yr  ,fhx4c_5yr  ,med5b_8yr  ,med26e___9
+med18c  ,med18b_2yr  ,fhx4d_5yr  ,med5c_8yr  ,med26e___10
+tob3  ,med18c_2yr  ,fhx5a_5yr  ,med9_1_8yr  ,med26e___11
+alc3  ,tob3x_2yr  ,fhx5b_5yr  ,med9_2_8yr  ,med26e___12
+alc4a  ,alc3_2yr  ,fhx5c_5yr  ,med9_3_8yr  ,med26e___13
+alc4b  ,alc4a_2yr  ,fhx5d_5yr  ,med9_4_8yr  ,med26e___14
+pss  ,alc4b_2yr  ,fhx6a_5yr  ,med9_5_8yr  ,med26e___15
+pss_a  ,pss_2yr  ,fhx6b_5yr  ,med9_1b_8yr  ,med26a
+pss1  ,pss_a_2yr  ,fhx6c_5yr  ,med9_2b_8yr  ,med26d
+pss2  ,pss1_2yr  ,fhx6d_5yr  ,med9_3b_8yr  ,med29
+pss3  ,pss2_2yr  ,tob3_5yr  ,med9_4b_8yr  ,med29a
+pss4  ,pss3_2yr  ,tob5_1_5yr  ,med9_5b_8yr  ,med29d
+pss5  ,pss4_2yr  ,tob5_2_5yr  ,med12_1_8yr  ,med30
+pss6  ,pss5_2yr  ,tob5_3_5yr  ,med12_4_8yr  ,med30a
+pss7  ,pss6_2yr  ,alc3_5yr  ,med12_5_8yr  ,med30d
+pss8  ,pss7_2yr  ,alc4a_5yr  ,med12_6_8yr  ,med31
+pss9  ,pss8_2yr  ,alc4b_5yr  ,med12_1b_8yr  ,med31e___4
+pss10  ,pss9_2yr  ,slp1_5yr  ,med12_2b_8yr  ,med31e___3
+pss11  ,pss10_2yr  ,slp2_5yr  ,med12_3b_8yr  ,med31e___2
+pss12  ,pss11_2yr  ,slp2t_5yr  ,med12_4b_8yr  ,med31e___5
+pss13  ,pss12_2yr  ,slp3a_5yr  ,med12_5b_8yr  ,med31e___1
+pss14  ,pss13_2yr  ,slp3b_5yr  ,med12_6b_8yr  ,med31a
+cesd_score  ,pss14_2yr  ,slp3c_5yr  ,med12_1c_8yr  ,med31d
+cesd_score_a  ,cesd_score_2yr  ,slp3d_5yr  ,med12_2c_8yr  ,med32
+ds1  ,cesd_score_a_2yr  ,slp3e_5yr  ,med12_3c_8yr  ,med32e___3
+ds2  ,ds1_2yr  ,slp4_5yr  ,med12_4c_8yr  ,med32e___7
+ds3  ,ds2_2yr  ,slp5_5yr  ,med12_5c_8yr  ,med32e___2
+ds4  ,ds4_2yr  ,pss_5yr  ,med12_6c_8yr  ,med32e___8
+ds5  ,ds5_2yr  ,pss_a_5yr  ,med16_8yr  ,med32a
+ds6  ,ds6_2yr  ,cesd_score_5yr  ,med16b_8yr  ,med32d
+ds7  ,ds7_2yr  ,cesd_score_a_5yr  ,med16c_8yr  ,med33e___1
+ds8  ,ds8_2yr  ,female  ,med17_8yr  ,med33e___2
+ds9  ,ds9_2yr  ,age_5yr  ,med17b_8yr  ,med33a
+ds10  ,ds10_2yr  ,nfa8v_5yr  ,med17c_8yr  ,med33d
+ds11  ,ds11_2yr  ,female,med18_8yr  ,med34
+ds12  ,ds12_2yr  ,soc29_5yr  ,med18b_8yr  ,med34a
+ds13  ,ds13_2yr  ,pdq_2j_5yr  ,med18c_8yr  ,med34d___1
+ds14  ,ds14_2yr  ,hc1_5yr  ,tob3_8yr  ,med34d___0
+ds15  ,ds15_2yr  ,hc1b_5yr  ,tob5_1_8yr  ,med34d___96
+ds16  ,ds16_2yr  ,hc1c_5yr  ,tob5_2_8yr  ,med34d___97
+ds17  ,ds17_2yr  ,hc8_5yr  ,tob5_3_8yr  ,med34d___98
+ds18  ,ds18_2yr  ,educ3  ,alc3_8yr  ,med35
+ds19  ,ds19_2yr  ,nfa1_5yr  ,alc4a_8yr  ,med35a
+ds20  ,ds20_2yr  ,nfa8r_5yr  ,alc4b_8yr  ,med35d
+female  ,female,nfa8s_5yr  ,pss1_8yr  ,fhi1
+age,ins2_1_2yr,nfa9a_5yr  ,pss2_8yr  ,fhi2
+pn2a  ,ins2_2_2yr,nfa9b_5yr  ,pss3_8yr  ,fhi5
+pn3a  ,ins2_3_2yr,nfa9c_5yr  ,pss4_8yr  ,fhi6
+pn4a  ,ins2_4_2yr,nfa9d_5yr  ,pss5_8yr  ,fhi7
+pn5a  , ins2_5_2yr,nfa8q_5yr  ,pss6_8yr  ,tob3
+pn6a  ,ins2_6_2yr,nfa7h_5yr  ,pss7_8yr  ,tob12
+pn7a  ,ins2_7_2yr,nfa8l_5yr  ,pss8_8yr  ,tob13
+pn8a  ,ins2_8_2yr,nfa8m_5yr  ,pss9_8yr  ,tob14
+pn9a  , ins2_9_2yr,nfa8n_5yr  ,pss10_8yr  ,tob15
+pn10a  ,hc1_2yr  ,nfa8o_5yr  ,pss11_8yr  ,alc3
+pn11a  ,hc1b_2yr  ,nfa8i_5yr  ,pss12_8yr  ,alc4a
+pn12a  ,hc1c_2yr  ,nfa2_5yr  ,pss13_8yr  ,alc4b
+pn13a  ,hc8_2yr  ,nfa10a_5yr  ,pss14_8yr  ,slp1
+pn14a  ,educ3  ,nfa10b_5yr  ,ds1_8yr  ,slp2
+pn15a  ,pn1a_2yr  ,nfa10c_5yr  ,ds2_8yr  ,slp2a
+pn16a  ,pn2a_2yr  ,nfa10d_5yr  ,ds4_8yr  ,slp5
+soc29  ,pn3a_2yr  ,nfa10e_5yr  ,ds5_8yr  ,slp6
+soc_activities  ,pn4a_2yr  ,nfa8u_5yr  ,ds6_8yr  ,slp7
+ins3a2  ,pn5a_2yr  ,nfa8w_5yr  ,ds7_8yr  ,slp8
+ins2_1  ,pn6a_2yr  ,nfa8y_5yr  ,ds8_8yr  ,slp9
+ins2_2  ,pn7a_2yr  ,nfa7a_5yr  ,ds9_8yr  ,slp10a
+ins2_3  ,pn8a_2yr  ,nfa7b_5yr  ,ds10_8yr  ,slp10b
+ins2_4  ,pn9a_2yr  ,nfa7c_5yr  ,ds11_8yr  ,pss1
+ins2_5  ,pn10a_2yr  ,nfa7d_5yr  ,ds12_8yr  ,pss2
+ins2_6  ,pn11a_2yr  ,nfa7e_5yr  ,ds13_8yr  ,dep9
+ins2_7  ,pn12a_2yr  ,nfa7g_5yr  ,ds14_8yr  ,dep10
+ins2_8  ,pn13a_2yr  ,nfa8h_5yr  ,ds15_8yr,dep11
+ins2_9  ,pn14a_2yr  ,nfa8k_5yr  ,pn10a_8yr  ,dep12
+hc1  ,pn15a_2yr  ,nfa4a_5yr  ,pn11a_8yr  ,dep13
+hc1b  ,pn16a_2yr  ,nfa4b_5yr  ,pn12a_8yr  ,dep14
+hc1c  ,pn1b_2yr  ,nfa4c_5yr  ,pn13a_8yr  ,dep15
+hc8  ,pn2b_2yr  ,nfa4d_5yr  ,soc29_8yr  ,dep16
+educ3  ,pn3b_2yr  ,nfa4e_5yr  ,hc1_8yr  ,dep17
+wh6ac  ,pn4b_2yr  ,nfa4f_5yr  ,hc1b_8yr  ,dep18
+pn1a  ,pn5b_2yr  ,nfa4g_5yr  ,hc1c_8yr  ,dep19
+pn1b  ,pn6b_2yr  ,nfa4h_5yr  ,hc8_8yr  ,dep20
+pn2b  ,pn7b_2yr  ,nfa4i_5yr  ,pn1a_8yr  ,dem3
+pn3b  ,pn8b_2yr  ,nfa4j_5yr  ,pn2a_8yr  ,age_calc
+pn4b  ,pn9b_2yr  ,soc1_5yr  ,pn3a_8yr  ,nss37
+pn5b  ,pn10b_2yr  ,soc2a_5yr  ,pn4a_8yr  ,nss31
+pn6b  ,emo1_1_2yr  ,soc2b_5yr  ,pn5a_8yr  ,soc20
+pn7b  ,emo1_2_2yr  ,soc3a_5yr  ,pn6a_8yr  ,hhc5b1
+pn8b  ,emo1_3_2yr  ,soc3b_5yr  ,pn7a_8yr  ,hhc5b2
+pn9b  ,emo1_4_2yr  ,soc4a_5yr  ,pn8a_8yr  ,hhc5b13
+pn10b  ,emo1_5_2yr  ,soc4b_5yr  ,pn1b_8yr  ,hhc5b15
+emo1_1  ,emo1_6_2yr  ,soc5a_5yr  ,pn2b_8yr  ,hhc5b3
+emo1_2  ,emo1_7_2yr  ,soc5b_5yr  ,pn3b_8yr  ,hhc5b4
+emo1_3  ,emo1_8_2yr  ,soc6_5yr  ,pn4b_8yr  ,hhc5b5
+emo1_4  ,emo1_9_2yr  ,soc16_5yr  ,pn5b_8yr  ,hhc5b6
+emo1_5  ,emo1_10_2yr  ,soc17_5yr  ,pn6b_8yr  ,hhc5b7
+emo1_6  ,emo2_1_2yr  ,soc172_962_5yr  ,pn7b_8yr  ,hhc5b8
+emo1_7  ,emo2_2_2yr  ,soc18_5yr  ,pn8b_8yr  ,hhc5b9
+emo1_8  ,emo2_3_2yr  ,soc20_5yr  ,pn9b_8yr  ,hhc5b10
+emo1_9  ,emo2_4_2yr  ,soc21_5yr  ,pn10b_8yr  ,hhc5b11
+emo1_10  ,emo2_5_2yr  ,soc22_5yr  ,soc1_8yr  ,hhc5b12
+emo2_1  ,emo2_6_2yr  ,soc23_5yr  ,soc2a_8yr  ,hhc5b14
+emo2_2  ,emo2_7_2yr  ,soc24_5yr  ,soc2b_8yr  ,hhc5b16
+emo2_3  ,emo2_8_2yr  ,soc25_5yr  ,soc3a_8yr  ,hhc5b17
+emo2_4  ,emo2_9_2yr  ,soc26_5yr  ,soc3b_8yr  ,hhc5b18
+emo2_5  ,emo2_10_2yr  ,soc27_5yr  ,soc4a_8yr  ,hhc5b19
+emo2_6  ,emo3_1_2yr  ,soc28_5yr  ,soc4b_8yr  ,hhc5b18a
+emo2_7  ,emo3_2_2yr  ,ins1_5yr  ,soc5a_8yr  ,hhc5b18b
+emo2_8  ,emo3_3_2yr  ,pdq_1a_5yr  ,soc5b_8yr  ,pdq2j
+emo2_9  ,emo3_4_2yr  ,pdq_1b_5yr  ,soc6_8yr  ,hem1
+emo2_10  ,emo3_5_2yr  ,pdq_1c_5yr  ,soc16_8yr  ,hem2a
+emo3_1  ,emo3_6_2yr  ,pdq_1d_5yr  ,soc17_8yr  ,hem2b
+emo3_2  ,emo3_7_2yr  ,pdq_1e_5yr  ,soc172_962_8yr  ,hem4
+emo3_3  ,emo3_8_2yr  ,pdq_1f_5yr  ,soc18_8yr  ,hem3
+emo3_4  ,emo3_9_2yr  ,pdq_1g_5yr  ,soc20_8yr  ,nss1
+emo3_5  ,emo3_10_2yr  ,pdq_1h_5yr  ,soc21_8yr  ,nss33
+emo3_6  ,emo4_1_2yr  ,pdq_2a_5yr  ,soc22_8yr  ,nss34
+emo3_7  ,emo4_2_2yr  ,pdq_2b_5yr  ,soc23_8yr  ,nss40
+emo3_8  ,emo4_3_2yr  ,pdq_2c_5yr  ,soc24_8yr  ,nss41
+emo3_9  ,emo4_4_2yr  ,pdq_2d_5yr  ,soc25_8yr  ,nss42
+emo3_10  ,emo4_5_2yr  ,pdq_2e_5yr  ,soc26_8yr  ,nss43
+emo4_1  ,emo4_6_2yr  ,pdq_2f_5yr  ,soc27_8yr  ,nss32
+emo4_2  ,emo4_7_2yr  ,pdq_2g_5yr  ,soc28_8yr  ,nss56
+emo4_3  ,emo4_8_2yr  ,pdq_2h_5yr  ,fss1_8yr  ,nss14
+emo4_4  ,emo4_9_2yr  ,pdq_2ht_5yr  ,fss1a1_8yr  ,nss15
+emo4_5  ,emo4_10_2yr  ,pdq_3a_5yr  ,fss1a2_8yr  ,nss16
+emo4_6  ,emo1_2yr  ,pdq_3b_5yr  ,fss1a3_8yr  ,nss17
+emo4_7  ,emo2_2yr  ,pdq_3c_5yr  ,fss1a4_8yr  ,nss11
+emo4_8  ,emo3_2yr  ,pdq_3d_5yr  ,fss1a5_8yr  ,nss2
+emo4_9  ,emo4_2yr  ,pdq_3e_5yr  ,fss1a6_8yr  ,nss44
+emo4_10  ,aid5_1_2yr  ,pdq_4a_5yr  ,fss1b1_8yr  ,nss45
+emo1  ,aid5_2_2yr  ,pdq_4b_5yr  ,fss1b3_8yr  ,nss46
+emo2  ,aid5_3_2yr  ,pdq_4c_5yr  ,fss1b4_8yr  ,nss47
+emo3  ,aid5_4_2yr  ,pdq_4d_5yr  ,fss1b5_8yr  ,nss48
+emo4  ,aid5_5_2yr  ,pdq_4e_5yr  ,hi_tot_8yr,nss36
+emosup  ,aid5_6_2yr  ,pdq_4f_5yr  ,gramamt,nss38
+aid5_1  ,aid5_7_2yr  ,pdq_4g_5yr  ,rfkcal,nss39
+aid5_2  ,aid5_8_2yr  ,pdq_4h_5yr  ,rfkj,nss49
+aid5_3  ,aid5_9_2yr  ,pdq_4i_5yr  ,rftcho,nss50
+aid5_4  ,aid5_10_2yr  ,pdq_4it_5yr  ,rffat,nss51
+aid5_5  ,aid6_1_2yr  ,pdq_2i_5yr  ,rfpro,nss52
+aid5_6  ,aid6_2_2yr  ,pdq_2it_5yr  ,rfvpro,nss53
+aid5_7  ,aid6_3_2yr  ,pdq_4j_5yr  ,rfapro,nss55
+aid5_8  ,aid6_4_2yr  ,hi_tot_5yr,rfalc,nss10
+aid5_9  ,aid6_5_2yr  ,gramamt_f_w3  ,rfchol,nss13
+aid5_10  ,aid6_6_2yr  ,kcal_f_w3  ,rfsfa,nss19
+aid6_1  ,aid6_7_2yr  ,kj_f_w3  ,rfmfa,nss20
+aid6_2  ,aid6_8_2yr  ,tcho_f_w3  ,rfpfa,nss21
+aid6_3  ,aid6_9_2yr  ,fat_f_w3  ,rffruc,nss22
+aid6_4  ,aid6_10_2yr  ,pro_f_w3  ,rfgala,nss23
+aid6_5  ,aid5_2yr  ,vpro_f_w3  ,rfgluc,nss24
+aid6_6  ,aid6_2yr  ,apro_f_w3  ,rflact,nss25
+aid6_7  ,aid_2yr  ,alc_f_w3  ,rfmalt,nss26
+aid6_8  ,soc1_2yr  ,chol_f_w3  ,rfsucr,nss27
+aid6_9  ,soc2a_2yr  ,sfa_f_w3  ,rfstar,nss28
+aid6_10  ,soc2b_2yr  ,mfa_f_w3  ,rftsugar,whi7
+aid5  ,soc3a_2yr  ,pfa_f_w3  ,rfdfib,nor0
+aid6  ,soc3b_2yr  ,fruc_f_w3  ,rfwsdf,nor1a
+aid  ,soc4a_2yr  ,gala_f_w3  ,rfifib,nor2a
+soc1  ,soc4b_2yr  ,gluc_f_w3  ,rfpect,nor3a
+soc2a  ,soc5a_2yr  ,lact_f_w3  ,rfva,nor4a
+soc2b  ,soc5b_2yr  ,malt_f_w3  ,rfacar,nor5a
+soc3a  ,soc6_2yr  ,sucr_f_w3  ,rfbceq,nor6a
+soc3b  ,ins1x_2yr  ,star_f_w3  ,rfbcar,nor7a
+soc4a  ,hi_tot_2yr  ,tsugar_f_w3  ,rfrl,nor8a
+soc4b  ,emosup_2yr,dfib_f_w3  ,rfvarae,nor9a
+soc5a  ,gramamt_f_w2  ,wsdf_f_w3  ,rfvare,nor10a
+soc5b  ,kcal_f_w2  ,ifib_f_w3  ,rfbcry,nor1c
+soc6  ,kj_f_w2  ,pect_f_w3  ,rflyco,nor2c
+soc16  ,tcho_f_w2  ,va_f_w3  ,rflz,nor3c
+soc17  ,fat_f_w2  ,acar_f_w3  ,rfvb6,nor4c
+soc18  ,pro_f_w2  ,bceq_f_w3  ,rfvb12,nor5c
+soc19  ,vpro_f_w2  ,bcar_f_w3  ,rffol,nor6c
+soc20  ,apro_f_w2  ,rl_f_w3  ,rfdfe,nor7c
+soc21  ,alc_f_w2  ,varae_f_w3  ,rfnfol,nor8c
+soc22  ,chol_f_w2  ,vare_f_w3  ,rfsfol,nor9c
+soc23  ,sfa_f_w2  ,bcry_f_w3  ,rfnia,nor10c
+soc24  ,mfa_f_w2  ,lyco_f_w3  ,rfniaeq,nor1d
+soc25  ,pfa_f_w2  ,lz_f_w3  ,rfpant,nor2d
+soc26  ,fruc_f_w2  ,vb6_f_w3  ,rfthi,nor3d
+soc27  ,gala_f_w2  ,vb12_f_w3  ,rfrib,nor4d
+soc28  ,gluc_f_w2  ,fol_f_w3  ,rfcholine,nor5d
+ins1  ,lact_f_w2  ,dfe_f_w3  ,rfttc,nor6d
+ins3a  ,malt_f_w2  ,nfol_f_w3  ,rfatc,nor7d
+ins3a2  ,sucr_f_w2  ,sfol_f_w3  ,rfnatatoc,nor8d
+hi_tot  ,star_f_w2  ,nia_f_w3  ,rfsynatoc,nor9d
+mh1,tsugar_f_w2  ,niaeq_f_w3  ,rfbtc,nor10d
+diet_type  ,dfib_f_w2  ,pant_f_w3  ,rfdtc,nor1e
+meal_place_brk  ,wsdf_f_w2  ,thi_f_w3  ,rfgtc,nor2e
+meal_place_lun  ,ifib_f_w2  ,rib_f_w3  ,rfvc,nor3e
+meal_place_din  ,pect_f_w2  ,choline_f_w3  ,rfvd,nor4e
+supp_use  ,va_f_w2  ,ttc_f_w3  ,rfvite,nor5e
+supdur_1  ,acar_f_w2  ,atc_f_w3  ,rfvk,nor6e
+supdur_2  ,bceq_f_w2  ,natatoc_f_w3  ,rfca,nor7e
+supdur_3  ,bcar_f_w2  ,synatoc_f_w3  ,rfcu,nor8e
+supdur_4  ,rl_f_w2  ,btc_f_w3  ,rffe,nor9e
+supdur_5  ,varae_f_w2  ,dtc_f_w3  ,rfk,nor10e
+supdur_6  ,vare_f_w2  ,gtc_f_w3  ,rfna,nor1f
+supdur_7  ,bcry_f_w2  ,vc_f_w3  ,rfmg,nor2f
+supdur_8  ,lyco_f_w2  ,vd_f_w3  ,rfmn,nor3f
+supdur_9  ,lz_f_w2  ,vite_f_w3  ,rfse,nor4f
+supdur_10  ,vb6_f_w2  ,vk_f_w3  ,rfzn,nor5f
+supdur_11  ,vb12_f_w2  ,ca_f_w3  ,rfp,nor6f
+supdur_12  ,fol_f_w2  ,cu_f_w3  ,rfs04_0,nor7f
+supdur_13  ,dfe_f_w2  ,fe_f_w3  ,rfs06_0,nor8f
+supdur_14  ,nfol_f_w2  ,k_f_w3  ,rfs08_0,nor9f
+supdur_15  ,sfol_f_w2  ,na_f_w3  ,rfs10_0,nor10f
+supdur_16  ,nia_f_w2  ,mg_f_w3  ,rfs12_0,nor1g
+supdur_17  ,niaeq_f_w2  ,mn_f_w3  ,rfs14_0,nor2g
+supdur_18  ,pant_f_w2  ,se_f_w3  ,rfs16_0,nor3g
+gramamt_f  ,thi_f_w2  ,zn_f_w3  ,rfs17_0,nor4g
+kcal_f  ,rib_f_w2  ,p_f_w3  ,rfs18_0,nor5g
+kj_f  ,choline_f_w2  ,s04_0_f_w3  ,rfs20_0,nor6g
+tcho_f  ,ttc_f_w2  ,s06_0_f_w3  ,rfs22_0,nor7g
+fat_f  ,atc_f_w2  ,s08_0_f_w3  ,rfm14_1,nor8g
+pro_f  ,natatoc_f_w2  ,s10_0_f_w3  ,rfm16_1,nor9g
+vpro_f  ,synatoc_f_w2  ,s12_0_f_w3  ,rfm18_1,nor10g
+apro_f  ,btc_f_w2  ,s14_0_f_w3  ,rfm20_1,nor1h
+alc_f  ,dtc_f_w2  ,s16_0_f_w3  ,rfm22_1,nor2h
+chol_f  ,gtc_f_w2  ,s17_0_f_w3  ,rfp18_2,nor3h
+sfa_f  ,vc_f_w2  ,s18_0_f_w3  ,rfp18_3,nor4h
+mfa_f  ,vd_f_w2  ,s20_0_f_w3  ,rfp18_4,nor5h
+pfa_f  ,vite_f_w2  ,s22_0_f_w3  ,rfp20_4,nor6h
+fruc_f  ,vk_f_w2  ,m14_1_f_w3  ,rfp20_5,nor7h
+gala_f  ,ca_f_w2  ,m16_1_f_w3  ,rfp22_5,nor8h
+gluc_f  ,cu_f_w2  ,m18_1_f_w3  ,rfp22_6,nor9h
+lact_f  ,fe_f_w2  ,m20_1_f_w3  ,rff161t,nor10h
+malt_f  ,k_f_w2  ,m22_1_f_w3  ,rff181t,soc1
+sucr_f  ,na_f_w2  ,p18_2_f_w3  ,rff182t,soc2a
+star_f  ,mg_f_w2  ,p18_3_f_w3  ,rfttfa,soc2b
+tsugar_f  ,mn_f_w2  ,p18_4_f_w3  ,rfomega3,soc3a
+dfib_f  ,se_f_w2  ,p20_4_f_w3  ,rfcyst,soc3b
+wsdf_f  ,zn_f_w2  ,p20_5_f_w3  ,rfglut,soc4a
+ifib_f  ,p_f_w2  ,p22_5_f_w3  ,rfglyc,soc4b
+pect_f  ,s04_0_f_w2  ,p22_6_f_w3  ,rfisol,soc5a
+va_f  ,s06_0_f_w2  ,f161t_f_w3  ,rfhist,soc5b
+acar_f  ,s08_0_f_w2  ,f181t_f_w3  ,rfleuc,soc6
+bceq_f  ,s10_0_f_w2  ,f182t_f_w3  ,rflysi,soc7
+bcar_f  ,s12_0_f_w2  ,ttfa_f_w3  ,rfmeth,soc8
+rl_f  ,s14_0_f_w2  ,omega3_f_w3  ,rfphen,soc9
+varae_f  ,s16_0_f_w2  ,cyst_f_w3  ,rfprol,soc10
+vare_f  ,s17_0_f_w2  ,glut_f_w3  ,rfseri,soc11
+bcry_f  ,s18_0_f_w2  ,glyc_f_w3  ,rfthre,soc12
+lyco_f  ,s20_0_f_w2  ,isol_f_w3  ,rftryp,soc13
+lz_f  ,s22_0_f_w2  ,hist_f_w3  ,rfalan,soc14
+vb6_f  ,m14_1_f_w2  ,leuc_f_w3  ,rfargi,soc15
+vb12_f  ,m16_1_f_w2  ,lysi_f_w3  ,rfaspa,soc16
+fol_f  ,m18_1_f_w2  ,meth_f_w3  ,rftyro,soc17
+dfe_f  ,m20_1_f_w2  ,phen_f_w3  ,rfvali,soc18
+nfol_f  ,m22_1_f_w2  ,prol_f_w3  ,rfmh3,soc19
+sfol_f  ,p18_2_f_w2  ,seri_f_w3  ,rfaspt,hhc5
+nia_f  ,p18_3_f_w2  ,thre_f_w3  ,rfglyt,hhc5a
+niaeq_f  ,p18_4_f_w2  ,tryp_f_w3  ,rfcoum,pdq1a
+pant_f  ,p20_4_f_w2  ,alan_f_w3  ,rfdaid,pdq1b
+thi_f  ,p20_5_f_w2  ,argi_f_w3  ,rfbetaine,pdq1c
+rib_f  ,p22_5_f_w2  ,aspa_f_w3  ,rfbioa,pdq1d
+choline_f  ,p22_6_f_w2  ,tyro_f_w3  ,rfformon,pdq1e
+ttc_f  ,f161t_f_w2  ,vali_f_w3  ,rfgeni,pdq1f
+atc_f  ,f181t_f_w2  ,mh3_f_w3  ,rferyth,pdq1g
+natatoc_f  ,f182t_f_w2  ,aspt_f_w3  ,rfmani,pdq1h
+synatoc_f  ,ttfa_f_w2  ,glyt_f_w3  ,rfinos,pdq2a
+btc_f  ,omega3_f_w2  ,coum_f_w3  ,rflactl,pdq2b
+dtc_f  ,cyst_f_w2  ,daid_f_w3  ,rfpini,pdq2c
+gtc_f  ,glut_f_w2  ,betaine_f_w3  ,rfsorb,pdq2d
+vc_f  ,glyc_f_w2  ,bioa_f_w3  ,rfxyli,pdq2e
+vd_f  ,isol_f_w2  ,formon_f_w3  ,rfacho,pdq2f
+vite_f  ,hist_f_w2  ,geni_f_w3  ,rfasugar,pdq2g
+vk_f  ,leuc_f_w2  ,eryth_f_w3  ,rfsucl,pdq2h
+ca_f  ,lysi_f_w2  ,mani_f_w3  ,rfacesk,pdq2h1
+cu_f  ,meth_f_w2  ,inos_f_w3  ,rfoxal,pdq3a
+fe_f  ,phen_f_w2  ,lactl_f_w3  ,rfphyt,pdq3b
+k_f  ,prol_f_w2  ,pini_f_w3  ,rfsp,pdq3c
+na_f  ,seri_f_w2  ,sorb_f_w3  ,rfcaf,pdq3d
+mg_f  ,thre_f_w2  ,xyli_f_w3  ,rfash,pdq3e
+mn_f  ,tryp_f_w2  ,acho_f_w3  ,rfw,pdq4a
+se_f  ,alan_f_w2  ,asugar_f_w3  ,rfnitrogen,pdq4b
+zn_f  ,argi_f_w2  ,sucl_f_w3  ,,pdq4c
+p_f  ,aspa_f_w2  ,acesk_f_w3  ,,pdq4d
+s04_0_f  ,tyro_f_w2  ,oxal_f_w3  ,,pdq4e
+s06_0_f  ,vali_f_w2  ,phyt_f_w3  ,,pdq4f
+s08_0_f  ,mh3_f_w2  ,sp_f_w3  ,,pdq4g
+s10_0_f  ,aspt_f_w2  ,caf_f_w3  ,,pdq4h
+s12_0_f  ,glyt_f_w2  ,ash_f_w3  ,,pdq4i
+s14_0_f  ,coum_f_w2  ,w_f_w3  ,,pdq4i1
+s16_0_f  ,daid_f_w2  ,nitrogen_f_w3,,pdq2i
+s17_0_f  ,betaine_f_w2  ,,,pdq2i1
+s18_0_f  ,bioa_f_w2  ,,,pdq4j
+s20_0_f  ,formon_f_w2  ,,,fss1
+s22_0_f  ,geni_f_w2  ,,,fss1a_1
+m14_1_f  ,eryth_f_w2  ,,,fss1a_2
+m16_1_f  ,mani_f_w2  ,,,fss1a_3
+m18_1_f  ,inos_f_w2  ,,,fss1a_4
+m20_1_f  ,lactl_f_w2  ,,,fss1a_5
+m22_1_f  ,pini_f_w2  ,,,fss1a_6
+p18_2_f  ,sorb_f_w2  ,,,fss1b_1
+p18_3_f  ,xyli_f_w2  ,,,fss1b_2
+p18_4_f  ,acho_f_w2  ,,,fss1b_3
+p20_4_f  ,asugar_f_w2  ,,,fss1b_4
+p20_5_f  ,sucl_f_w2  ,,,whi10
+p22_5_f  ,acesk_f_w2  ,,,mha1
+p22_6_f  ,oxal_f_w2  ,,,summary17
+f161t_f  ,phyt_f_w2  ,,,summary18
+f181t_f  ,sp_f_w2  ,,,summary19
+f182t_f  ,caf_f_w2  ,,,summary20
+ttfa_f  ,ash_f_w2  ,,,supyn
+omega3_f  ,w_f_w2  ,,,supdur1
+cyst_f  ,nitrogen_f_w2,,,supdur2
+glut_f  ,,,,supdur3
+glyc_f  ,,,,supdur4
+isol_f  ,,,,supdur5
+hist_f  ,,,,supdur6
+leuc_f  ,,,,supdur7
+lysi_f  ,,,,supdur8
+meth_f  ,,,,supdur9
+phen_f  ,,,,supdur10
+prol_f  ,,,,supdur11
+seri_f  ,,,,supdur12
+thre_f  ,,,,supdur13
+tryp_f  ,,,,supdur14
+alan_f  ,,,,supdur15
+argi_f  ,,,,supdur16
+aspa_f  ,,,,supdur17
+tyro_f  ,,,,supdur18
+vali_f  ,,,,gramamt
+mh3_f  ,,,,rfkcal
+aspt_f  ,,,,rfkj
+glyt_f  ,,,,rftcho
+coum_f  ,,,,rffat
+daid_f  ,,,,rfpro
+betaine_f  ,,,,rfvpro
+bioa_f  ,,,,rfapro
+formon_f  ,,,,rfalc
+geni_f  ,,,,rfchol
+eryth_f  ,,,,rfsfa
+mani_f  ,,,,rfmfa
+inos_f  ,,,,rfpfa
+lactl_f  ,,,,rffruc
+pini_f  ,,,,rfgala
+sorb_f  ,,,,rfgluc
+xyli_f  ,,,,rflact
+acho_f  ,,,,rfmalt
+asugar_f  ,,,,rfsucr
+sucl_f  ,,,,rfstar
+acesk_f  ,,,,rftsugar
+oxal_f  ,,,,rfdfib
+phyt_f  ,,,,rfwsdf
+sp_f  ,,,,rfifib
+caf_f  ,,,,rfpect
+ash_f  ,,,,rfva
+w_f  ,,,,rfacar
+nitrogen_f,,,,rfbceq
+,,,,rfbcar
+,,,,rfrl
+,,,,rfvarae
+,,,,rfvare
+,,,,rfbcry
+,,,,rflyco
+,,,,rflz
+,,,,rfvb6
+,,,,rfvb12
+,,,,rffol
+,,,,rfdfe
+,,,,rfnfol
+,,,,rfsfol
+,,,,rfnia
+,,,,rfniaeq
+,,,,rfpant
+,,,,rfthi
+,,,,rfrib
+,,,,rfcholine
+,,,,rfttc
+,,,,rfatc
+,,,,rfnatatoc
+,,,,rfsynatoc
+,,,,rfbtc
+,,,,rfdtc
+,,,,rfgtc
+,,,,rfvc
+,,,,rfvd
+,,,,rfvite
+,,,,rfvk
+,,,,rfca
+,,,,rfcu
+,,,,rffe
+,,,,rfk
+,,,,rfna
+,,,,rfmg
+,,,,rfmn
+,,,,rfse
+,,,,rfzn
+,,,,rfp
+,,,,rfs04_0
+,,,,rfs06_0
+,,,,rfs08_0
+,,,,rfs10_0
+,,,,rfs12_0
+,,,,rfs14_0
+,,,,rfs16_0
+,,,,rfs17_0
+,,,,rfs18_0
+,,,,rfs20_0
+,,,,rfs22_0
+,,,,rfm14_1
+,,,,rfm16_1
+,,,,rfm18_1
+,,,,rfm20_1
+,,,,rfm22_1
+,,,,rfp18_2
+,,,,rfp18_3
+,,,,rfp18_4
+,,,,rfp20_4
+,,,,rfp20_5
+,,,,rfp22_5
+,,,,rfp22_6
+,,,,rff161t
+,,,,rff181t
+,,,,rff182t
+,,,,rfttfa
+,,,,rfomega3
+,,,,rfcyst
+,,,,rfglut
+,,,,rfglyc
+,,,,rfisol
+,,,,rfhist
+,,,,rfleuc
+,,,,rflysi
+,,,,rfmeth
+,,,,rfphen
+,,,,rfprol
+,,,,rfseri
+,,,,rfthre
+,,,,rftryp
+,,,,rfalan
+,,,,rfargi
+,,,,rfaspa
+,,,,rftyro
+,,,,rfvali
+,,,,rfmh3
+,,,,rfaspt
+,,,,rfglyt
+,,,,rfcoum
+,,,,rfdaid
+,,,,rfbetaine
+,,,,rfbioa
+,,,,rfformon
+,,,,rfgeni
+,,,,rferyth
+,,,,rfmani
+,,,,rfinos
+,,,,rflactl
+,,,,rfpini
+,,,,rfsorb
+,,,,rfxyli
+,,,,rfacho
+,,,,rfasugar
+,,,,rfsucl
+,,,,rfacesk
+,,,,rfoxal
+,,,,rfphyt
+,,,,rfsp
+,,,,rfcaf
+,,,,rfash
+,,,,rfw
+,,,,rfnitrogen
