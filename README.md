@@ -12,12 +12,10 @@ This repository contains a modular, Python-based harmonization pipeline for the 
 
 ```
 harmonization_pipeline/
-│
+│── main.py                     # Main script to execute the full pipeline
 ├── config.yaml                 # User-editable file with paths to raw input data
 │
 ├── harmonization_scripts/
-│   ├── main.py                 # Main script to execute the full pipeline
-│   ├── config.py               # Loads YAML configuration
 │   │
 │   ├── check/
 │   │   ├── check_variables.py  # Verifies that required variables exist before execution 
