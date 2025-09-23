@@ -40,7 +40,7 @@ harmonization_pipeline/
 │   └── validate/
 │       └── validate.py         # Runs validation/quality-control checks on harmonized data
 │
-├── data/
+├── data/                       #User must include the raw data in the data/raw folder
 │   ├── raw/                    # Raw input data (SAS/CSV files)
 │   ├── intermediate/           # Cleaned and transformed files
 │   └── output/                 # Final merged harmonized dataset + validation reports
