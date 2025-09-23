@@ -1,0 +1,39 @@
+
+
+# -------------------------
+# BPRHS Raw Files
+# -------------------------
+bprhs_v1: data/raw/bprhs/fullbaseline_03jan2018.sas7bdat
+bprhs_v2: data/raw/bprhs/full2yr_19nov2018.sas7bdat
+bprhs_v3: data/raw/bprhs/released_5yr_bprhs_07dec23.sas7bdat
+bprhs_v4: data/raw/bprhs/released_8yr_010424.sas7bdat
+
+ffq_bprhs_v1: data/raw/bprhs/baseline_ffq_per_day_011922.sas7bdat
+ffq_bprhs_v2: data/raw/bprhs/twoyear_ffq_per_day_011922.sas7bdat
+ffq_bprhs_v3: data/raw/bprhs/fiveyear_ffq_per_day_062223.sas7bdat
+ffq_bprhs_v4: data/raw/bprhs/eightyear_ffq_per_day_121323.sas7bdat
+
+
+
+# -------------------------
+# PROSPECT Raw Files
+# -------------------------
+
+# FFQ raw data files
+ffq_prospect_spanish: data/raw/prospect/PROSPECT5FFQ_Spanish_raw_09MAY2024(in).csv
+ffq_prospect_english: data/raw/prospect/PROSPECT5aFFQ_English_raw_09MAY2024(in).csv
+ffq_prospect_perday_full: data/raw/prospect/ffq_perday_perfood659_all_copy_Tufts.csv
+
+# FFQ summary files by visit
+ffq_prospect_perday_v1: data/raw/prospect/baseline_ffq_per_day_011922.sas7bdat
+ffq_prospect_perday_v2: data/raw/prospect/twoyear_ffq_per_day_011922.sas7bdat
+ffq_prospect_perday_v3: data/raw/prospect/fiveyear_ffq_per_day_062223.sas7bdat
+ffq_prospect_perday_v4: data/raw/prospect/eightyear_ffq_per_day_121323.sas7bdat
+
+# Health raw data
+health_prospect_spanish: data/raw/prospect/PROSPECT4_DATA_SPANISH_VISITS1&2__2024-11-26_1522.csv
+health_prospect_english: data/raw/prospect/PROSPECT4a_DATA_ENGLISH_VISITS1&2_2024-11-26_1523.csv
+
+# SDOH raw data
+sdoh_prospect_spanish: data/raw/prospect/PROSPECT4_DATA_SPANISH_VISITS1&2__2024-11-26_1522.csv
+sdoh_prospect_english: data/raw/prospect/PROSPECT4a_DATA_ENGLISH_VISITS1&2_2024-11-26_1523.csv
