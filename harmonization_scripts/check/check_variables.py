@@ -4,7 +4,7 @@ import pyreadstat
 
 def check_required_variables(config):
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-    variables_path = os.path.join(project_root, "scripts", "check", "variables.csv")
+    variables_path = os.path.join(project_root, "harmonization_scripts", "check", "variables.csv")
 
     if not os.path.exists(variables_path):
         raise FileNotFoundError(f"Missing variables.csv at: {variables_path}")

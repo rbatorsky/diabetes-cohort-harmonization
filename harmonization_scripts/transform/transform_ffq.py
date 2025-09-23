@@ -11,7 +11,7 @@ def transform_ffq(config):
     # -----------------------------------------------------------------------------------------------
 
 
-    from scripts.load.loader_ffq import load_ffq_spanish_data
+    from harmonization_scripts.load.loader_ffq import load_ffq_spanish_data
 
     data = load_ffq_spanish_data(config)
     df_hmz_ffq_bprhs_0 = data['bprhs_0']
@@ -1065,7 +1065,7 @@ def transform_ffq(config):
     # -----------------------------------------------------------------------------------------------
 
     # loading the data: English (only PROSPECT)
-    from scripts. load.loader_ffq import load_ffq_english_data
+    from harmonization_scripts. load.loader_ffq import load_ffq_english_data
     data = load_ffq_english_data(config)
     df_hmz_ffq_prospect_english = data['prospect_english']
 

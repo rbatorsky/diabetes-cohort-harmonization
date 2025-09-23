@@ -13,7 +13,7 @@ def transform_sdoh(config):
     # ------------------------------------------------------------------------------------------------
 
 
-    from scripts.load.loader_sdoh import load_sdoh_spanish_data
+    from harmonization_scripts.load.loader_sdoh import load_sdoh_spanish_data
 
     data = load_sdoh_spanish_data(config)
 
@@ -3239,7 +3239,7 @@ def transform_sdoh(config):
     #-------------------------------------------------------------------------------------------------
     #-------------------------------------------------------------------------------------------------
     # loading the data: english (only PROSPECT)
-    from scripts.load.loader_sdoh import load_sdoh_english_data
+    from harmonization_scripts.load.loader_sdoh import load_sdoh_english_data
     data = load_sdoh_english_data(config)
     df_hmz_sdoh_prospect_english = data['prospect_english']
 

@@ -11,7 +11,7 @@ def transform_health(config):
     # Loading the data: Spanish
     # -----------------------------------------------------------------------------------------------
 
-    from scripts.load.loader_health import load_health_spanish_data
+    from harmonization_scripts.load.loader_health import load_health_spanish_data
 
     data = load_health_spanish_data(config)
 
@@ -5389,7 +5389,7 @@ def transform_health(config):
     ##%%
     #---------------------------------------------------------------------------------------
     # loading the data: english (only PROSPECT)
-    from scripts.load.loader_health import load_health_english_data
+    from harmonization_scripts.load.loader_health import load_health_english_data
     data = load_health_english_data(config)
     df_hmz_health_prospect_english = data['prospect_english']
     #--------------------------------------------------------------------------------------------
