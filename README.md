@@ -15,7 +15,7 @@ harmonization_pipeline/
 │
 ├── config.yaml                 # User-editable file with paths to raw input data
 │
-├── scripts/
+├── harmonization_scripts/
 │   ├── main.py                 # Main script to execute the full pipeline
 │   ├── config.py               # Loads YAML configuration
 │   │
@@ -56,7 +56,7 @@ harmonization_pipeline/
 2. Run the pipeline:
 
 ```
-python scripts/main.py
+main.py
 ```
 
 The pipeline will:
@@ -77,7 +77,7 @@ The pipeline will:
 Before proceeding with any data transformations, the pipeline performs a validation check to ensure the raw input files contain all necessary variables listed in:
 
 ```
-scripts/check/variables.csv
+harmonization_scripts/check/variables.csv
 ```
 
 If any variables are missing, the pipeline will raise an error and halt execution. This ensures the harmonization process only runs with valid input data.
