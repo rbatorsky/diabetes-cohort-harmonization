@@ -1,0 +1,19 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Session / coordination notes (local only)
+COORDINATION_NOTE.md
+LOCAL_SESSION_NOTE.md
+
+# SLURM job logs
+ml_scripts/*.out
+ml_scripts/*.err
+ml_scripts/logs_impute_sens/
+
+# RStudio project file
+ml_scripts/ml_scripts.Rproj
+
+# Local debug scratch script
+ml_scripts/debug.R

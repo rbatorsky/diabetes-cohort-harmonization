@@ -1,25 +1,28 @@
-LIB="/cluster/tufts/patralab/rbator01/R_libs/4.4.0/"
-.libPaths(LIB)
-library(openxlsx)
-library(tidymodels)
-library(tidyverse)
-library(workflows)
-library(tune)
-library(compositions)
-library(caret)
-library(VIM)
-library(visdat)
-library(ggpubr)
+#######
+## select visit data and variables present in both cohorts
+#######
 
-filter=dplyr::filter
-rename=dplyr::rename
-select=dplyr::select
-intersect=base::intersect
-setwd("/cluster/tufts/patralab/rbator01/aiml_ordovas_project/")
+suppressPackageStartupMessages({
+  library(openxlsx)
+  library(tidymodels)
+  library(workflows)
+  library(tune)
+  library(compositions)
+  library(caret)
+  library(visdat)
+  library(ggpubr)
+  library(dplyr)
+  library(stringr)
+  library(ggplot2)
+})
 
-# function -----
+# functions -----
 
-filter_by_missingness <- function(data, cohort_col_missing_threshold = 0.9, overall_col_missing_threshold = 0.5, row_missing_threshold = 0.1, cohort_visits) {
+filter_by_missingness <- function(data, 
+                                  cohort_col_missing_threshold = 0.9, 
+                                  overall_col_missing_threshold = 0.5, 
+                                  row_missing_threshold = 0.1, 
+                                  cohort_visits) {
   
   # Convert cohort_visits to data frame if it's a list
   if (is.list(cohort_visits) && !is.data.frame(cohort_visits)) {
@@ -33,11 +36,11 @@ filter_by_missingness <- function(data, cohort_col_missing_threshold = 0.9, over
   # Validation check
   stopifnot(all(c("cohort", "visit") %in% names(cohort_visits)))
   
-  # Step 1: Convert all non-ID columns to character
+  # Convert all non-ID columns to character
   data_char <- data %>%
     mutate(across(-c(studyid, cohort, visit), as.character))
   
-  # Step 2: Calculate missingness per cohort and variable
+  # Calculate missingness per cohort and variable
   cohort_missing <- data_char %>%
     pivot_longer(-c(studyid, cohort, visit), names_to = "variable", values_to = "value") %>%
     group_by(cohort, variable) %>%
@@ -50,7 +53,7 @@ filter_by_missingness <- function(data, cohort_col_missing_threshold = 0.9, over
     filter(n_cohorts == length(unique(data$cohort))) %>%
     pull(variable)
   
-  # Step 3: Calculate overall column-wise missingness
+  # Calculate overall column-wise missingness
   overall_missing <- data_char %>%
     summarise(across(all_of(vars_pass_cohort), ~mean(is.na(.)))) %>%
     pivot_longer(everything(), names_to = "variable", values_to = "missing_frac")
@@ -62,15 +65,15 @@ filter_by_missingness <- function(data, cohort_col_missing_threshold = 0.9, over
   # Final set of columns to retain
   variables_passing <- intersect(vars_pass_cohort, vars_pass_overall)
   
-  # Step 4: Filter dataset to selected columns
+  # Filter dataset to selected columns
   filtered_data <- data %>%
     select(studyid, cohort, visit, all_of(variables_passing))
   
-  # Step 5: Convert selected columns to character
+  # Convert selected columns to character
   filtered_data_char <- filtered_data %>%
     mutate(across(all_of(variables_passing), as.character))
   
-  # Step 6: Filter out rows with > row_missing_threshold missing
+  # Filter out rows with > row_missing_threshold missing
   row_filtered_data <- filtered_data_char %>%
     rowwise() %>%
     mutate(
@@ -83,7 +86,6 @@ filter_by_missingness <- function(data, cohort_col_missing_threshold = 0.9, over
   return(row_filtered_data)
 }
 
-# Strict version: stops if conversion introduces unexpected NAs
 safe_as_numeric <- function(x) {
   converted <- as.numeric(x)
   
@@ -100,9 +102,7 @@ safe_as_numeric <- function(x) {
 }
 
 clean_and_convert_variables <- function(data, num_cat, 
-                                        na_strings_n = c("", 996, 997, 999),
-                                        na_strings_c = c("", 96, 97, 98, 99),
-                                        max_cat_levels = 40) {
+                                        max_cat_levels = 10) {
   
   # Ensure variable names in num_cat exist in data
   num_cat <- num_cat %>%
@@ -113,15 +113,14 @@ clean_and_convert_variables <- function(data, num_cat,
     var_type <- num_cat$type[i]
     
     if (var_type == "n") {
-      data[[var_name]] <- replace(data[[var_name]], data[[var_name]] %in% na_strings_n, NA)
       data[[var_name]] <- safe_as_numeric(data[[var_name]])
       
     } else if (var_type == "c") {
-      data[[var_name]] <- replace(data[[var_name]], data[[var_name]] %in% na_strings_c, NA)
       data[[var_name]] <- factor(data[[var_name]], levels = unique(data[[var_name]]))
       
       ncat <- nlevels(data[[var_name]])
       if (ncat > max_cat_levels) {
+        print("here")
         warning(paste("Categorical variable", var_name, "has", ncat, "levels"))
         print(levels(data[[var_name]]))
       }
@@ -131,32 +130,49 @@ clean_and_convert_variables <- function(data, num_cat,
   return(data)
 }
 
+# read in data ----
+data_file = "../../data/hmz_data/df_hmz_bprhs_prospect_2025.csv"
+data = read.csv(data_file)
+meta_file = "../../data/hmz_data/hmz_bprhs_prospect_metadata_2025.xlsx"
 
-# combined data ----
-#data = read.csv("data/andreia_hmz_data/df_hmz_bprhs_prospect_2025.csv")
-#data = read.csv("data/andreia_hmz_data/df_hmz_bprhs_prospect_3june_2025.csv")
-data = read.csv("data/andreia_hmz_data/hmz_bprhs_prospect_30july_2025.csv")
+# test number visit 1
+vis1 = data %>%
+  filter(visit == "v1")
+table(vis1$cohort)
 
-num_cat = read.xlsx("data/andreia_hmz_data/hmz_bprhs_prospect_metadata_30july2025.xlsx") %>%
+# filter soc_emo development should not have data level 5 -----
+remove <- data %>%
+  filter(if_any(
+    c(hmz_sdoh_soc_emo2_1, hmz_sdoh_soc_emo2_2, hmz_sdoh_soc_emo2_3,
+      hmz_sdoh_soc_emo2_4, hmz_sdoh_soc_emo2_5, hmz_sdoh_soc_emo2_6,
+      hmz_sdoh_soc_emo2_7),
+    ~ .x == 5
+  ))
+
+data = data %>%
+  filter(!studyid == remove$studyid)
+
+# read in numeric or categorical data
+num_cat = read.xlsx(meta_file) %>%
   mutate(type_of_variable = ifelse(variable_name == "hmz_health_ds",'n',type_of_variable)) %>%
   select(variable_name, type_of_variable) %>%
-  mutate(variable_name = gsub(" ","", variable_name))
+  mutate(variable_name = gsub(" ","", variable_name)) %>%
+  mutate(type_of_variable = ifelse(variable_name == "studyid",'n',type_of_variable))
 
 setdiff(colnames(data),num_cat$variable_name)
 setdiff(num_cat$variable_name,colnames(data))
 
 # remove variables that are summarized into comparable aggregate variables -----
-# --- Step 1. Identify "_avg" canonical vars ---
 avg_vars <- names(data) %>% str_subset("_avg$")
 avg_prefixes <- str_remove(avg_vars, "_avg$")
 
-# --- Step 2. Add explicitly canonical vars (no _avg, just base names) ---
+# Add explicitly canonical vars (no _avg, just base names) ---
 base_canonicals <- c("hmz_health_pss", "hmz_health_ds","hmz_sdoh_soc_support_ii")
 
 # Their prefixes are just themselves
 all_prefixes <- c(avg_prefixes, base_canonicals)
 
-# --- Step 3. Find numbered variants in the data ---
+# Find numbered variants in the data ---
 number_cols <- names(data) %>% str_subset("_[0-9]+$")    # cols ending in _<number>
 number_prefixes <- str_remove(number_cols, "_[0-9]+$")   # strip number suffix
 
@@ -164,20 +180,17 @@ number_prefixes <- str_remove(number_cols, "_[0-9]+$")   # strip number suffix
 number_cols2 <- names(data) %>% str_subset("[0-9]+$")
 number_prefixes2 <- str_remove(number_cols2, "[0-9]+$")
 
-# --- Step 4. Collect to drop ---
+# Collect to drop ---
 to_drop <- c(
   number_cols[number_prefixes %in% all_prefixes],
   number_cols2[number_prefixes2 %in% base_canonicals]
 )
 
-to_drop
-
-# --- Step 5. Drop them ---
+# Drop them ---
 data <- data %>% 
   select(-all_of(to_drop))
 
 # Convert the soc2a/2b variables to seconds ------
-
 data = data %>%
   mutate(
     # convert soc2b categories into a multiplier
@@ -204,11 +217,7 @@ data <- data %>%
   )%>%
   select(-c(hmz_sdoh_soc3a,hmz_sdoh_soc3b))
 
-head(num_cat)
 num_cat = rbind(num_cat, data.frame(variable_name = c('hmz_sdoh_soc2a_time_s','hmz_sdoh_soc3a_times_year'), type_of_variable = c('n','n')))
-
-setdiff(colnames(data),num_cat$variable_name)
-setdiff(num_cat$variable_name,colnames(data))
 
 # test for all NA and non NA variables 
 na.test <-  function (x) {
@@ -235,76 +244,92 @@ bp = data %>%
 na.test(bp)
 no.na.test(bp)
 
-# check non-numeric cols
+# check non-numeric cols before conversion ----
 non_numeric_cols <- names(data)[!sapply(data, is.numeric)]
-
+non_numeric_cols
 # [1] "visit"                            "cohort"                           "hmz_sdoh_disc_other_ii"           "hmz_sdoh_disc_life_main_other_ii"
 # [5] "hmz_sdoh_disc_life_main_other"    "hmz_health_slp2"  
 
 data <- data %>%
   mutate(across(where(is.character), trimws))
 
-# remove remaining non-numeric
-non_numeric_cols = setdiff(non_numeric_cols, c('visit','cohort'))
-
-data = data %>%
-  select(-non_numeric_cols)
-
 # make numeric and categorical -----
 data <- clean_and_convert_variables(data = data, num_cat = num_cat)
 
+unique(data$hmz_sdoh_pdq_2h_other)
+unique(data$hmz_sdoh_pdq_2i_other)
+unique(data$hmz_sdoh_pdq_4i_other)
+unique(data$hmz_health_hb_slp2)
+
+# convert HH:MM → minutes since midnight
+library(lubridate)
+convert_to_minutes <- function(x) {
+  x <- na_if(x, "")
+  x <- if_else(
+    !is.na(x) & str_detect(x, "^\\d{1,2}:\\d{2}$"),
+    paste0(x, ":00"),
+    x
+  )
+  as.numeric(hms(x)) / 60
+}
+
+data$slp_min <- convert_to_minutes(data$hmz_health_hb_slp2)
+
+library(Hmisc)
+data$slp_bin_q <- cut2(data$slp_min, g = 4)  # quartiles
+
+table(data$cohort, data$slp_bin_q)
+
+# remove remaining non-numeric
+#non_numeric_cols = setdiff(non_numeric_cols, c('visit','cohort'))
+#non_numeric_cols
+#data = data %>%
+#  select(-non_numeric_cols)
 
 # save alltime data before filtering to v1 -----
 
 all_times = data
 
-saveRDS(all_times, "r_pipeline/analysis/rds/all_times_unfiltered_19aug25.rds")
+# test number
+vis1 = data %>%
+  filter(visit == "v1")
+table(vis1$cohort)
+
+saveRDS(all_times, "../../analysis/all_times_unfiltered.rds")
 
 # filter visit 1 ------
-all_times = readRDS("r_pipeline/analysis/rds/all_times_unfiltered_19aug25.rds")
-
 data = all_times %>%
   filter(visit == "v1") 
 
-# move to eda
-# ggviolin(data, x = "cohort", y = "hmz_health_ds_a",
-#          add = "boxplot") +
-#   ggtitle("ds_a distribution visit 1")
-# 
-# ggviolin(data, x = "cohort", y = "hmz_health_pss_a",
-#          add = "boxplot") +
-#   ggtitle("pss_a distribution visit 1")
-
-
-# filter the age 
-ggviolin(data, x = "cohort", y = "hmz_sdoh_age",
-         add = "boxplot") +
-  stat_compare_means(label="p.format",method="wilcox.test") +
-  ggtitle("age distribution visit 1")
-
-data = data %>%
-  filter(hmz_sdoh_age>38)
-
-ggviolin(data, x = "cohort", y = "hmz_sdoh_age",
-         add = "boxplot") +
-  stat_compare_means(label="p.format",method="wilcox.test") +
-  ggtitle("age distribution visit 1")
-
-# KCAL
-ggviolin(data, x = "cohort", y = "hmz_ffq_kcal",
-         add = "boxplot") +
-  stat_compare_means(label="p.format",method="wilcox.test") +
-  ggtitle("kcal visit 1")
-
+table(data$cohort)
+# BPRHS PROSPECT 
+# 1509     1738 
 
 data =  data %>% 
   filter(hmz_ffq_kcal > 600 & hmz_ffq_kcal < 4800)
+
+table(data$cohort)
+#BPRHS PROSPECT 
+#1418     1003 
 
 ggviolin(data, x = "cohort", y = "hmz_ffq_kcal",
          add = "boxplot") +
   stat_compare_means(label="p.format",method="wilcox.test") +
   ggtitle("kcal visit 1, kcal > 600 & kcal < 4800")
 
+# investigate age filtering ---------
+ggviolin(data, x = "cohort", y = "hmz_sdoh_age",
+         add = "boxplot") +
+  stat_compare_means(label="p.format",method="wilcox.test") +
+  ggtitle("age distribution visit 1")
+
+data_agefilt = data %>%
+ filter(hmz_sdoh_age>38)
+
+ggviolin(data_agefilt, x = "cohort", y = "hmz_sdoh_age",
+         add = "boxplot") +
+  stat_compare_means(label="p.format",method="wilcox.test") +
+  ggtitle("age distribution visit 1")
 
 ggscatter(data, x = "hmz_sdoh_age", y = "hmz_ffq_kcal",
           add = "reg.line",                         # Add regression line
@@ -325,7 +350,7 @@ ggscatter(data, x = "hmz_sdoh_age", y = "hmz_ffq_kcal",
 #vis_miss(ffq_data,warn_large_data = FALSE)+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 # find data that is present in both bprhs and prospect ------
-# Define visits per cohort
+
 cohort_visits <- list(
   BPRHS = c("v1"),
   PROSPECT = c("v1")
@@ -338,8 +363,6 @@ data_select <- filter_by_missingness(
   row_missing_threshold = 0.1,
   cohort_visits = cohort_visits
 )
-
-str(data_select$cohort)
 
 data_select = data_select %>%
   mutate(cohort = ifelse(cohort == "BPRHS",0,1))
@@ -359,66 +382,129 @@ table(case_when(
   TRUE ~ "other"
 ))
 
-saveRDS(data_select, "r_pipeline/analysis/rds/harmonize_2cohort_healthsdohffq_20aug25_v1_rmmissing_50col_10row.rds")
+variables_passing
+dim(data_select)
 
-# Outlier examination, not removing outliers for now ------
+table(data_select$cohort)
+# 0    1 
+# 1407  947  
+
+saveRDS(data_select, "../../analysis/harmonize_2cohort_healthsdohffq_v1_rmmissing_50col_10row.rds")
+
+# Count how many retained variables belong to each prefix category
+table(case_when(
+  grepl("^hmz_sdoh", variables_passing) ~ "sdoh",
+  grepl("^hmz_ffq", variables_passing) ~ "ffq",
+  grepl("^hmz_health", variables_passing) ~ "health",
+  TRUE ~ "other"
+))
+
+# filter visit 2 ------
+data = all_times %>%
+  filter(visit == "v2") 
+
+table(data$cohort)
+# BPRHS PROSPECT 
+# 1273     1718 
+
+ggviolin(data, x = "cohort", y = "hmz_ffq_kcal",
+         add = "boxplot") +
+  stat_compare_means(label="p.format",method="wilcox.test") +
+  ggtitle("kcal visit 2")
+
+data =  data %>% 
+  filter(hmz_ffq_kcal > 600 & hmz_ffq_kcal < 4800)
+
+# test = data %>% 
+#   filter(hmz_ffq_kcal < 600 | hmz_ffq_kcal > 4800)
 # 
-# remove_outlier <- function(dataframe, columns = names(dataframe),low,high) {
+# test = data %>%
+#   filter(is.na(hmz_ffq_kcal))
 # 
-#   studyid = dataframe$studyid
-# 
-#   dataframe = dataframe %>%
-#     select(-c('cohort','visit','studyid'))
-# 
-#   # Identify discrete vs. continuous variables
-#   for (col in columns) {
-#     x = dataframe[[col]]
-#     Quantile1 <- quantile(x, probs=low, na.rm=T)
-#     Quantile3 <- quantile(x, probs=high, na.rm=T)
-#     IQR = Quantile3 - Quantile1
-#     test = (!is.na(x) & (x > Quantile3 + (IQR * 1.5) | x < Quantile1 - (IQR * 1.5)))
-#     
-#     if(any(test)){
-#       print(col)
-#       print(studyid[test])
-#       print(x[test])
-#     }
-#       #dataframe <- dataframe[!detect_outlier(dataframe[[col]],low,high), ]
-#   }
-# }
-# 
-# pr = data_select %>%
-#   filter(cohort == "PROSPECT")
-# 
-# bp = data_select %>%
-#   filter(cohort == "BPRHS")
-# 
-# # want to remove outliers but not from the ffq 
-# numeric_cols <- names(data_select)[sapply(data_select, is.numeric)]
-# ffq_cols = colnames(data_select)[grep("hmz_ffq",colnames(data_select))]
-# numeric_cols = setdiff(numeric_cols, ffq_cols)
-# 
-# pr_ro = remove_outlier(pr, numeric_cols, low = 0.05, high = 0.95)
-# bp_ro = remove_outlier(bp, numeric_cols, low = 0.05, high = 0.95)
-# 
-# # slp questions - don't do this - the slp questionaire is only at 5 yr
-# # data <- data %>%
-# #   mutate(
-# #     hmz_health_slp_problem_sum = rowSums(
-# #       across(matches("^hmz_health_slp_problem_[iv]+$"), ~ as.numeric(as.character(.))),
-# #       na.rm = F
-# #     )
-# #   ) %>%
-# #   select(-matches("^hmz_health_slp_problem_[iv]+$"))
-# # 
-# # 
-# #
-# # note that these are removed # step_mutate(
-# #   hmz_health_slp_problem_sum = 
-# #     hmz_health_slp_problem_i + 
-# #     hmz_health_slp_problem_ii + 
-# #     hmz_health_slp_problem_iii + 
-# #     hmz_health_slp_problem_iv + 
-# #     hmz_health_slp_problem_v) %>%
-# #   step_rm(matches("^hmz_health_slp_problem_[iv]+$")) %>%
-# #   
+# view(test %>% select(studyid, cohort, visit, hmz_ffq_kcal))
+### HERE 
+table(data$cohort)
+# BPRHS PROSPECT 
+# 1208       92 
+
+# investigate age filtering ---------
+ggviolin(data, x = "cohort", y = "hmz_sdoh_age",
+         add = "boxplot") +
+  stat_compare_means(label="p.format",method="wilcox.test") +
+  ggtitle("age distribution visit 1")
+
+data_agefilt = data %>%
+  filter(hmz_sdoh_age>38)
+
+ggviolin(data_agefilt, x = "cohort", y = "hmz_sdoh_age",
+         add = "boxplot") +
+  stat_compare_means(label="p.format",method="wilcox.test") +
+  ggtitle("age distribution visit 1")
+
+ggscatter(data, x = "hmz_sdoh_age", y = "hmz_ffq_kcal",
+          add = "reg.line",                         # Add regression line
+          conf.int = TRUE,                          # Add confidence interval
+          color = "cohort", palette = "jco",           # Color by groups "cyl"
+          shape = "cohort"                             # Change point shape by groups "cyl"
+) +
+  stat_cor(aes(color = cohort), label.x = 30)           # Add correlation coefficient
+
+# visualize NA - before selection
+#sdoh_data = data[,colnames(data)[grep("hmz_sdoh",colnames(data))]]
+#vis_miss(sdoh_data,warn_large_data = FALSE)+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+#
+#health_data = data[,colnames(data)[grep("hmz_health",colnames(data))]]
+#vis_miss(health_data,warn_large_data = FALSE)+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+#
+#ffq_data = data[,colnames(data)[grep("hmz_ffq",colnames(data))]]
+#vis_miss(ffq_data,warn_large_data = FALSE)+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+# find data that is present in both bprhs and prospect ------
+
+cohort_visits <- list(
+  BPRHS = c("v1"),
+  PROSPECT = c("v1")
+)
+
+data_select <- filter_by_missingness(
+  data = data,
+  cohort_col_missing_threshold = 0.9, 
+  overall_col_missing_threshold = 0.5,
+  row_missing_threshold = 0.1,
+  cohort_visits = cohort_visits
+)
+
+data_select = data_select %>%
+  mutate(cohort = ifelse(cohort == "BPRHS",0,1))
+
+data_select$cohort = factor(data_select$cohort, levels=c(0,1))
+
+data_select <- clean_and_convert_variables(data = data_select, num_cat = num_cat)
+
+variables_passing = colnames(data_select)
+
+# Count how many retained variables belong to each prefix category
+
+table(case_when(
+  grepl("^hmz_sdoh", variables_passing) ~ "sdoh",
+  grepl("^hmz_ffq", variables_passing) ~ "ffq",
+  grepl("^hmz_health", variables_passing) ~ "health",
+  TRUE ~ "other"
+))
+
+variables_passing
+dim(data_select)
+
+table(data_select$cohort)
+# 0    1 
+# 1190   80  
+
+saveRDS(data_select, "../../analysis/harmonize_2cohort_healthsdohffq_v2_rmmissing_50col_10row.rds")
+
+# Count how many retained variables belong to each prefix category
+table(case_when(
+  grepl("^hmz_sdoh", variables_passing) ~ "sdoh",
+  grepl("^hmz_ffq", variables_passing) ~ "ffq",
+  grepl("^hmz_health", variables_passing) ~ "health",
+  TRUE ~ "other"
+))

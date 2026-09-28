@@ -1,5 +1,9 @@
 #######
-## Run the models
+## Imputation sensitivity analysis (reviewer comment 6)
+## Copy of 05_rf.R; only the numeric imputation step differs, chosen by arg 10:
+##   knn     = published recipe (KNN numeric, mode categorical)
+##   median  = median numeric, mode categorical
+##   knn_ind = KNN + missingness-indicator features (probes non-MAR missingness)
 #######
 
 LIB="/cluster/tufts/patralab/rbator01/R_libs/4.4.0/"
@@ -28,6 +32,8 @@ importance       <- args[6]
 data_string      <- args[7]
 cross_cohort_val <- as.integer(args[8])
 regress_batch    <- as.integer(args[9])
+impute_method    <- args[10]
+stopifnot(impute_method %in% c("knn", "median", "knn_ind"))
 
 # nclass           <- 2
 # outvar           <- "diabetes"
@@ -51,7 +57,8 @@ message(paste(
   "\n  importance       =", importance,
   "\n  data_string      =", data_string,
   "\n  cross_cohort_val =", cross_cohort_val,
-  "\n  regress_batch    =", regress_batch,  
+  "\n  regress_batch    =", regress_batch,
+  "\n  impute_method    =", impute_method,
   "\n==========================================",
   sep = ""
 ))
@@ -67,11 +74,14 @@ save_string = paste0(
   "_seed", seed,
   "_tune_caseweights_", importance,
   "_xcohortval_", cross_cohort_val,
-  "_resbatch_", regress_batch,    
-  "_24feb26"
+  "_resbatch_", regress_batch,
+  "_imp_", impute_method,
+  "_28sep26"
 )
 
-OUTPATH  = "../../analysis/"
+# separate folder so nothing overwrites the published runs
+OUTPATH  = "../../analysis/impute_sens/"
+dir.create(OUTPATH, showWarnings = FALSE, recursive = TRUE)
 
 if (visit == "v1"){
   RDS1 = "../../analysis/harmonize_2cohort_healthsdohffq_v1_rmmissing_50col_10row.rds"
@@ -230,11 +240,29 @@ vars_to_keep <- c("cohort")
 preprocessing_recipe <-
   recipe(diabetes ~ ., data = train_data) %>%
   # Make sure character cats become factors
-  step_string2factor(all_nominal_predictors()) %>%
+  step_string2factor(all_nominal_predictors())
+
+# knn_ind: add a 0/1 missingness flag per predictor BEFORE imputing
+# (flags with no missingness in TRAIN are constant and removed by step_nzv)
+if (impute_method == "knn_ind") {
+  preprocessing_recipe <- preprocessing_recipe %>%
+    step_indicate_na(all_predictors(), -any_of(vars_to_keep))
+}
+
+preprocessing_recipe <- preprocessing_recipe %>%
   # Don't touch 'cohort' during preprocessing
   step_impute_mode(all_nominal_predictors(), -all_outcomes(), -any_of(vars_to_keep)) %>%
-  step_nzv(all_predictors(), -all_outcomes(), -all_of(vars_to_keep)) %>%
-  step_impute_knn(all_numeric_predictors(), neighbors = 5, -any_of(vars_to_keep)) %>%
+  step_nzv(all_predictors(), -all_outcomes(), -all_of(vars_to_keep))
+
+if (impute_method == "median") {
+  preprocessing_recipe <- preprocessing_recipe %>%
+    step_impute_median(all_numeric_predictors(), -any_of(vars_to_keep))
+} else {
+  preprocessing_recipe <- preprocessing_recipe %>%
+    step_impute_knn(all_numeric_predictors(), neighbors = 5, -any_of(vars_to_keep))
+}
+
+preprocessing_recipe <- preprocessing_recipe %>%
   step_corr(all_numeric_predictors(), threshold = 0.9, -any_of(vars_to_keep)) %>%
   step_normalize(all_numeric_predictors(), -any_of(vars_to_keep))
 
