@@ -1,74 +1,102 @@
+#######
+## Run the models
+#######
+
 LIB="/cluster/tufts/patralab/rbator01/R_libs/4.4.0/"
 .libPaths(LIB)
-library(openxlsx)
-library(tidymodels)
-library(tidyverse)
-library(workflows)
-library(tune)
-library(compositions)
-library(caret)
-library(VIM)
-library(visdat)
-library(recipes)
-library(themis)
-library(yardstick)
-library(vip)
-library(Boruta)
 
-filter=dplyr::filter
-rename=dplyr::rename
-select=dplyr::select
-setwd("/cluster/tufts/patralab/rbator01/aiml_ordovas_project/")
+source("utils.R")
+
+pkgs <- c(
+  "openxlsx", "tidymodels", "tidyverse", "workflows", "tune", "compositions",
+  "caret", "VIM", "visdat", "recipes", "themis", "yardstick", "vip", "Boruta"
+)
+
+invisible(lapply(pkgs, function(pkg) {
+  suppressPackageStartupMessages(
+    library(pkg, character.only = TRUE)
+  )
+}))
 
 args <- commandArgs(trailingOnly = TRUE)
-nclass = args[1]
-outvar = args[2]
-filter_cohort = args[3]
-downsample = args[4]
-seed = args[5]
-visit = args[6]
-importance = args[7]
-data_string = args[8]
+nclass           <- as.integer(args[1])
+outvar           <- args[2]
+filter_cohort    <- args[3]
+seed             <- as.integer(args[4])
+visit            <- args[5]
+importance       <- args[6]
+data_string      <- args[7]
+cross_cohort_val <- as.integer(args[8])
+regress_batch    <- as.integer(args[9])
 
-# nclass = 2
-# outvar = "diabetes"
-# filter_cohort = "none"
-# downsample = 0
-# seed=1
-# visit='v2'
-# importance = "boruta"
-# ##data_string="sdoh"
-# data_string="all"
+# nclass           <- 2
+# outvar           <- "diabetes"
+# filter_cohort    <- "none"
+# downsample       <- 0
+# seed             <- 1
+# visit            <- "v1"
+# importance       <- "boruta"
+# data_string      <- "all"
+# cross_cohort_val <- 0
+# regress_batch    <- 1
 
-save_string = paste0(data_string, "_",outvar,"_",visit,"_class", nclass,"_filter",filter_cohort,"_ds",downsample,"_", seed,"_tune_caseweights_",importance,"_25aug25")
-print(save_string)
+message(paste(
+  "\n==========================================",
+  "\nRun parameters:",
+  "\n  nclass           =", nclass,
+  "\n  outvar           =", outvar,
+  "\n  filter_cohort    =", filter_cohort,
+  "\n  seed             =", seed,
+  "\n  visit            =", visit,
+  "\n  importance       =", importance,
+  "\n  data_string      =", data_string,
+  "\n  cross_cohort_val =", cross_cohort_val,
+  "\n  regress_batch    =", regress_batch,  
+  "\n==========================================",
+  sep = ""
+))
 
-data = readRDS("r_pipeline/analysis/rds/harmonize_2cohort_healthsdohffq_20aug25_v1_rmmissing_50col_10row.rds")
 
-table(data$visit, data$cohort)
+# string for output
+save_string = paste0(
+  data_string, 
+  "_", outvar, 
+  "_", visit,
+  "_class", nclass,
+  "_filter", filter_cohort,
+  "_seed", seed,
+  "_tune_caseweights_", importance,
+  "_xcohortval_", cross_cohort_val,
+  "_resbatch_", regress_batch,    
+  "_24feb26"
+)
 
-# diabetes outcome, 2 class
-tracker = read.xlsx("data/diabetes_status_wchange_2class_4aug25.xlsx")  %>%
-  rename(diabetes = paste0("diabetes_",visit)) %>%
-  select(studyid, cohort, diabetes) %>%
-  filter(!is.na(diabetes))
+OUTPATH  = "../../analysis/"
 
-tracker$cohort = factor(tracker$cohort, levels=c(0,1))
-
-data = data  %>%
-  inner_join(tracker, by=c('studyid','cohort'))
-
-data$diabetes = factor(data$diabetes, levels=c(0,1))
-
-table(data$cohort, data$diabetes)
-
-if(filter_cohort != "none"){
-  data <- data %>% filter(cohort == filter_cohort)
+if (visit == "v1"){
+  RDS1 = "../../analysis/harmonize_2cohort_healthsdohffq_v1_rmmissing_50col_10row.rds"
+}else if (visit == "v2"){
+  RDS1 = "../../analysis/harmonize_2cohort_healthsdohffq_v2_rmmissing_50col_10row.rds"
+  
 }
+TRK  = "../../data/hmz_data/diabetes_tracker_2class_24feb26.xlsx"
+
+data <- read_merge_tracker(
+  rds_path     = RDS1,
+  tracker_path = TRK,
+  visit        = visit,
+  label_cohort = FALSE,          
+  filter_cohort = filter_cohort         
+)
 
 table(data$cohort, data$diabetes)
 
-# remove variables# remove vw2_progressariables
+
+# sanity check
+stopifnot(all(unique(data$cohort) %in% c(0,1)))
+
+# remove variables
+# remove v2_progress variables
 var_to_rm = c("hmz_health_lab_a1c",
               "hmz_health_lab_gluc",
               "hmz_health_med_1",
@@ -77,7 +105,8 @@ var_to_rm = c("hmz_health_lab_a1c",
               "hmz_health_med_1_today",
               "hmz_health_lab_insulin",
               "studyid", 
-              "visit")
+              "visit",
+              "hmz_days_since_visit_1")
 
 data = data %>%
   select(-any_of(var_to_rm))
@@ -91,49 +120,150 @@ if(data_string == "sdoh"){
     select(all_of(c(sdoh_vars, "diabetes", "cohort")))
 }
 
-# split the data into trainng (75%) and testing (25%)
 set.seed(seed)
-split <- initial_split(data,
-                       prop = 3/4,
-                       strata = "diabetes")
 
-# extract training and testing sets
-train_data <- training(split)
-test_data <- testing(split)
+# Define cohort codes (adjust if needed)
+cohort_bprhs    <- 0L
+cohort_prospect <- 1L
 
-vars_to_keep <- c("cohort")
+# Choose split strategy ------
+if (identical(data_string, "all") && cross_cohort_val %in% 1:4) {
+  
+  if (cross_cohort_val == 1) {
+    # xcohortval1: train on BOTH, test on PROSPECT
+    message("xcohortval1: pooled TRAIN, TEST on PROSPECT (cohort = ", cohort_prospect, ")")
+    
+    data_eval <- dplyr::filter(data, cohort == cohort_prospect)
+    data_rest <- dplyr::filter(data, cohort != cohort_prospect)
+    
+    # stratified hold-out within PROSPECT
+    split_eval <- initial_split(data_eval,
+                                prop   = 3/4,
+                                strata = "diabetes")
+    
+    train_eval <- training(split_eval)
+    test_data  <- testing(split_eval)
+    
+    # pooled training = other cohort(s) + training slice of PROSPECT
+    train_data <- dplyr::bind_rows(data_rest, train_eval)
+    
+  } else if (cross_cohort_val == 2) {
+    # xcohortval2: train on BOTH, test on BPRHS
+    message("xcohortval2: pooled TRAIN, TEST on BPRHS (cohort = ", cohort_bprhs, ")")
+    
+    data_eval <- dplyr::filter(data, cohort == cohort_bprhs)
+    data_rest <- dplyr::filter(data, cohort != cohort_bprhs)
+    
+    # stratified hold-out within BPRHS
+    split_eval <- initial_split(data_eval,
+                                prop   = 3/4,
+                                strata = "diabetes")
+    
+    train_eval <- training(split_eval)
+    test_data  <- testing(split_eval)
+    
+    # pooled training = other cohort(s) + training slice of BPRHS
+    train_data <- dplyr::bind_rows(data_rest, train_eval)
+    
+  } else if (cross_cohort_val == 3) {
+    # xcohortval3: train on PROSPECT, test on BPRHS
+    message("xcohortval3: TRAIN = PROSPECT, TEST = BPRHS")
+    
+    train_data <- dplyr::filter(data, cohort == cohort_prospect)
+    test_data  <- dplyr::filter(data, cohort == cohort_bprhs)
+    
+  } else if (cross_cohort_val == 4) {
+    # xcohortval4: train on BPRHS, test on PROSPECT
+    message("xcohortval4: TRAIN = BPRHS, TEST = PROSPECT")
+    
+    train_data <- dplyr::filter(data, cohort == cohort_bprhs)
+    test_data  <- dplyr::filter(data, cohort == cohort_prospect)
+  }
+  
+} else {
+  message("Random split")
+  set.seed(seed)
+  split <- initial_split(data, prop = 3/4, strata = "diabetes")
+  train_data <- training(split)
+  test_data  <- testing(split)
+}
+
+
+msg_print <- function(x, header = NULL) {
+  if (!is.null(header)) message(header)
+  message(paste(capture.output(print(x)), collapse = "\n"))
+}
+
+msg_print(table(train_data$cohort),         "TRAIN cohort counts:")
+msg_print(table(test_data$cohort),          "TEST  cohort counts:")
+msg_print(table(train_data$cohort, train_data$diabetes),
+          "TRAIN diabetes by cohort:")
+msg_print(table(test_data$cohort,  test_data$diabetes),
+          "TEST  diabetes by cohort:")
+
+# ----- Save cohort counts for this run -----
+
+train_cohort_tab <- as.data.frame(table(train_data$cohort))
+test_cohort_tab  <- as.data.frame(table(test_data$cohort))
+
+cohort_counts <- dplyr::bind_rows(
+  train_cohort_tab %>%
+    dplyr::mutate(split = "train"),
+  test_cohort_tab %>%
+    dplyr::mutate(split = "test")
+) %>%
+  dplyr::rename(
+    cohort = Var1,
+    n      = Freq
+  ) %>%
+  dplyr::mutate(
+    cohort = as.integer(as.character(cohort))
+  )
+
+# Per-run file:
+cohort_counts_file <- paste0(OUTPATH, "cohort_counts_", save_string, ".csv")
+write.csv(cohort_counts, cohort_counts_file, row.names = FALSE)
+
+# Preprocessing recipe -----
+vars_to_keep <- c("cohort")  
 
 preprocessing_recipe <-
   recipe(diabetes ~ ., data = train_data) %>%
-  # all your predictors that should be categorical are explicitly converted to factors before any further processing
-  step_string2factor(all_nominal_predictors()) 
+  # Make sure character cats become factors
+  step_string2factor(all_nominal_predictors()) %>%
+  # Don't touch 'cohort' during preprocessing
+  step_impute_mode(all_nominal_predictors(), -all_outcomes(), -any_of(vars_to_keep)) %>%
+  step_nzv(all_predictors(), -all_outcomes(), -all_of(vars_to_keep)) %>%
+  step_impute_knn(all_numeric_predictors(), neighbors = 5, -any_of(vars_to_keep)) %>%
+  step_corr(all_numeric_predictors(), threshold = 0.9, -any_of(vars_to_keep)) %>%
+  step_normalize(all_numeric_predictors(), -any_of(vars_to_keep))
 
-preprocessing_recipe = preprocessing_recipe  %>%
-  # Step 1: Impute missing values in categorical variables with mode
-  step_impute_mode(all_nominal_predictors(), -all_outcomes(),-any_of(vars_to_keep)) %>%
-  step_nzv(all_predictors(), -all_outcomes(),-all_of(vars_to_keep)) %>%
-  # Step 3: Impute missing values in numeric variables using KNN
-  step_impute_knn(all_numeric_predictors(), neighbors = 5,-any_of(vars_to_keep)) %>%
-  # Step 5: Remove highly correlated predictors (> 0.9)
-  step_corr(all_numeric_predictors(), threshold = 0.9,-any_of(vars_to_keep)) %>%
-  # Step 4: Scale numeric variables for better performance (optional)
-  step_normalize(all_numeric_predictors(),-any_of(vars_to_keep))
-
-# Prep the recipe and retain the outcome
+# Prep on TRAIN only; then bake both
 prepped_recipe <- prep(preprocessing_recipe, training = train_data)
+train_baked    <- juice(prepped_recipe)
+test_baked     <- bake(prepped_recipe, new_data = test_data)
 
-# Use juice() to retain outcome in training data
-train_baked <- juice(prepped_recipe)
 
-# Use bake() for testing data
-test_baked <- bake(prepped_recipe, new_data = test_data)
+if (!is.na(regress_batch) && regress_batch == 1) {
+  message("Residualizing numeric predictors by cohort on TRAIN and TEST (using TRAIN-based means)")
+  
+  # fit on TRAIN
+  res_train <- residualize_by_cohort(train_baked, cohort_var = "cohort")
+  train_baked <- res_train$data
+  
+  # apply same cohort means to TEST
+  res_test <- residualize_by_cohort(test_baked,
+                                    cohort_var = "cohort",
+                                    ref_means  = res_train$ref_means)
+  test_baked <- res_test$data
+}
 
-saveRDS(train_baked, paste0("r_pipeline/analysis/rf/train_baked_", save_string,".rds"))
-saveRDS(test_baked, paste0("r_pipeline/analysis/rf/test_baked_", save_string,".rds"))
+#saveRDS(train_baked, paste0(OUTPATH,"train_baked_", save_string,".rds"))
+#saveRDS(test_baked, paste0(OUTPATH,"test_baked_", save_string,".rds"))
+#train_baked = readRDS(paste0(OUTPATH,"train_baked_", save_string,".rds"))
+#test_baked = readRDS(paste0(OUTPATH,"test_baked_", save_string,".rds"))
 
-train_baked = readRDS(paste0("r_pipeline/analysis/rf/train_baked_", save_string,".rds"))
-test_baked = readRDS(paste0("r_pipeline/analysis/rf/test_baked_", save_string,".rds"))
-
+# Case Weights ------
 w_tbl <- train_baked %>%
   count(cohort, diabetes, name = "n_cd") %>%
   group_by(cohort) %>%
@@ -145,39 +275,45 @@ train_baked <- train_baked %>%
             by = c("cohort","diabetes")) %>%
   mutate(weight = importance_weights(weight))  
 
-# keep a copy aligned to rows (used if Boruta drops the column)
 weights_vec <- train_baked$weight
 
-if(importance == "boruta"){
+# Include cohort ONLY when not doing cross-cohort validation ----
+#include_cohort <- (cross_cohort_val == 0)
+
+# Boruta selection aligned with include_cohort -----
+if (importance == "boruta") {
+  boruta_data <- train_baked %>% 
+    select(-weight)
+  
   set.seed(seed)
   boruta_result <- Boruta(
-    formula = diabetes ~ .,
-    data = train_baked %>% select(-weight),   # <-- do NOT give Boruta the weight column
+    diabetes ~ .,
+    data = boruta_data,
     doTrace = 2,
     maxRuns = 100
   )
   
   boruta_vars <- getSelectedAttributes(boruta_result, withTentative = FALSE)
-  tentative   <- getSelectedAttributes(boruta_result, withTentative = TRUE)
-  confirmed   <- getSelectedAttributes(boruta_result, withTentative = FALSE)
+  tentative <- getSelectedAttributes(boruta_result, withTentative = TRUE) 
+  confirmed <- getSelectedAttributes(boruta_result, withTentative = FALSE)
   
-  saveRDS(boruta_result, paste0("r_pipeline/analysis/rf/boruta_result_", save_string, ".rds"))
-  write.csv(attStats(boruta_result), paste0("r_pipeline/analysis/rf/boruta_stats_", save_string, ".csv"))
+  saveRDS(boruta_result, paste0(OUTPATH,"boruta_result_", save_string, ".rds"))
+  write.csv(attStats(boruta_result), paste0(OUTPATH,"boruta_stats_", save_string, ".csv"))
   
-  # reduce to Boruta-selected predictors + outcome (TRAIN), then reattach weights
+  keep_cols <- c("diabetes", boruta_vars)
+
   train_baked <- train_baked %>%
-    select(all_of(c("diabetes", boruta_vars))) %>%
+    select(all_of(keep_cols)) %>%
     mutate(weight = importance_weights(weights_vec))
   
-  # reduce TEST the same way (no weights on test)
-  test_baked <- test_baked %>%
-    select(all_of(c("diabetes", boruta_vars)))
+  test_baked <- test_baked %>% 
+    select(all_of(keep_cols))
   
-  saveRDS(train_baked, paste0("r_pipeline/analysis/rf/train_baked_borutafiltered_", save_string,".rds"))
-  saveRDS(test_baked,  paste0("r_pipeline/analysis/rf/test_baked_borutafiltered_",  save_string,".rds"))
+  saveRDS(train_baked, paste0(OUTPATH,"train_baked_borutafiltered_", save_string,".rds"))
+  saveRDS(test_baked,  paste0(OUTPATH,"test_baked_borutafiltered_",  save_string,".rds"))
 }
 
-# ---- Random Forest with case weights via workflow ----
+# Model + workflow ------
 rf_model <- rand_forest(
   mode = "classification",
   mtry = tune(),
@@ -186,10 +322,12 @@ rf_model <- rand_forest(
 ) %>%
   set_engine("ranger", importance = "impurity")
 
+model_formula <- diabetes ~ .
+
 wf <- workflow() %>%
   add_model(rf_model) %>%
-  add_formula(diabetes ~ .) %>%
-  add_case_weights(weight)   # case-weight
+  add_formula(model_formula) %>%
+  add_case_weights(weight)
 
 # resampling
 set.seed(seed)
@@ -207,6 +345,7 @@ rf_grid <- grid_latin_hypercube(
 library(doParallel)
 cl <- makeCluster(4)
 registerDoParallel(cl)
+on.exit(stopCluster(cl), add = TRUE)
 
 tuned_results <- tune_grid(
   wf,
@@ -225,15 +364,15 @@ tuned_results %>%
   facet_wrap(~parameter, scales = "free_x") +
   labs(x = NULL, y = "AUC")
 
-saveRDS(tuned_results, paste0("r_pipeline/analysis/rf/rf_tune_res_", save_string))
+saveRDS(tuned_results, paste0(OUTPATH,"rf_tune_res_", save_string, ".rds"))
 
 best_params <- select_best(tuned_results, metric = "roc_auc")
 final_wf <- finalize_workflow(wf, best_params)
-saveRDS(final_wf, paste0("r_pipeline/analysis/rf/final_wf_rf_", save_string))
+saveRDS(final_wf, paste0(OUTPATH,"final_wf_rf_", save_string, ".rds"))
 
 final_fit <- final_wf %>%
   fit(data = train_baked)      # <-- no case_weights arg; workflow uses `weight` column
-saveRDS(final_fit, paste0("r_pipeline/analysis/rf/rf_final_fit_", save_string))
+saveRDS(final_fit, paste0(OUTPATH,"rf_final_fit_", save_string, ".rds"))
 
 # Make predictions on test data
 test_preds <- predict(final_fit, new_data = test_baked, type = "prob") %>%
@@ -262,7 +401,7 @@ p = autoplot(conf_mat_result, type = "heatmap") +
   scale_fill_gradient(low = "white", high = "blue")
 
 show(p)
-ggsave(p, filename = paste0("r_pipeline/analysis/results/log_", save_string, "_confmat.pdf"), width = 3, height = 3)
+ggsave(p, filename = paste0(OUTPATH, save_string, "_confmat.pdf"), width = 3, height = 3)
 
 # Extract variable importance
 fitted_model <- extract_fit_parsnip(final_fit)
@@ -277,9 +416,9 @@ vi_top <- fitted_model %>%
     TRUE ~ "other"
   ))
 
-confirmed = getSelectedAttributes(boruta_result, withTentative = FALSE)
-
 if(importance == "boruta"){
+  
+  confirmed = getSelectedAttributes(boruta_result, withTentative = FALSE)
   vi_top = vi_top %>%
     mutate(boruta = ifelse(Variable %in% confirmed, 'confirmed','tentative'))
 }
@@ -298,7 +437,7 @@ p <- ggplot(vi_top, aes(
   coord_flip() +
   ylab("Variable Importance") +
   xlab("") +
-  ggtitle(paste0(outvar,"_",visit,"_class", nclass,"_filter",filter_cohort,"_ds",downsample,"_", seed)) +
+  ggtitle(paste0(outvar,"_",visit,"_class", nclass,"_filter",filter_cohort,"_", seed)) +
   theme_bw()+
   scale_fill_manual(values = c(
     "ffq"    = "steelblue",
@@ -319,7 +458,7 @@ p <- ggplot(vi_top, aes(
 
 show(p)
 # Save variable importance plot
-ggsave(p, filename = paste0("r_pipeline/analysis/results/log_", save_string, ".pdf"), width = 5, height = 7)
+ggsave(p, filename = paste0(OUTPATH, save_string, ".pdf"), width = 5, height = 7)
 
 # Prepare log data for saving
 log_df <- vi_top %>%
@@ -330,27 +469,26 @@ log_df <- vi_top %>%
     visit = visit,
     data_string = data_string,
     filter_cohort = filter_cohort,
-    downsample = downsample,
     accuracy = perf_wide$accuracy,
     kap = perf_wide$kap,
     sensitivity = perf_wide$sensitivity,
     specificity = perf_wide$specificity
   ) %>%
-  select(seed, nclass, outvar, visit, data_string, filter_cohort, downsample, rank, Variable, type, Importance,
+  select(seed, nclass, outvar, visit, data_string, filter_cohort, rank, Variable, type, Importance,
          accuracy, kap, sensitivity, specificity)
 
 # Save log to CSV
-write.csv(log_df, paste0("r_pipeline/analysis/results/log_", save_string, ".csv"), row.names = FALSE)
+write.csv(log_df, paste0(OUTPATH, "log_", save_string, ".csv"), row.names = FALSE)
 
 # Save the trained model and results
-saveRDS(wf, paste0("r_pipeline/analysis/rf/final_model_", save_string,".rds"))
-saveRDS(test_preds, paste0("r_pipeline/analysis/rf/test_predictions_", save_string,".rds"))
+saveRDS(wf, paste0(OUTPATH,"final_model_", save_string,".rds"))
+saveRDS(test_preds, paste0(OUTPATH,"test_predictions_", save_string,".rds"))
 
 # roc
 roc_obj <- yardstick::roc_curve(test_preds, truth = diabetes, .pred_1, event_level="second")
-saveRDS(roc_obj, paste0("r_pipeline/analysis/results/log_", save_string, "_roc.rds"))
+saveRDS(roc_obj, paste0(OUTPATH, save_string, "_roc.rds"))
 
 p_roc <- autoplot(roc_obj) +
   ggtitle("ROC Curve")
 
-ggsave(p_roc, filename = paste0("r_pipeline/analysis/results/log_", save_string, "_roc.pdf"), width = 5, height = 4)
+ggsave(p_roc, filename = paste0(OUTPATH, save_string, "_roc.pdf"), width = 5, height = 4)
