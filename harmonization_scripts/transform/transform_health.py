@@ -261,13 +261,22 @@ def transform_health(config):
     # --------------------------------------
     # PROSPECT
     # --------------------------------------
+    
+    # Transformation
+    # Using in a filter in case of some units in cm
+    # Fix mixed units in PROSPECT hc_avg
+    # Transformation
+    # Using a filter in case some units are in cm
+    filter = df_hmz_health_prospect["hc_avg"] > 80
+    df_hmz_health_prospect.loc[filter, "hc_avg"] = (
+    df_hmz_health_prospect.loc[filter, "hc_avg"] * 0.393701)
+    print(f"Converted {filter.sum()} PROSPECT hip values from cm to inches")
+
     # Renaming
     df_hmz_health_prospect.rename(columns={'hc_avg': 'hmz_ant_hip_prospect'}, inplace=True)
 
-    # Saving
+    #   Saving
     df_hmz_health_prospect.to_csv('data/intermediate/df_hmz_health_prospect.csv', index=False)
-
-
 
 
 
@@ -814,30 +823,29 @@ def transform_health(config):
 
     # Dictionary with datasets and corresponding suffixes
     bprhs_datasets = {
-        "Baseline": (df_hmz_health_bprhs_0, ""),
-        "2-Year": (df_hmz_health_bprhs_2, "_2yr"),
-        "5-Year": (df_hmz_health_bprhs_5, "_5yr"),
-        "8-Year": (df_hmz_health_bprhs_8, "_8yr")
-    }
+    "Baseline": (df_hmz_health_bprhs_0, ""),
+    "2-Year": (df_hmz_health_bprhs_2, "_2yr"),
+    "5-Year": (df_hmz_health_bprhs_5, "_5yr"),
+    "8-Year": (df_hmz_health_bprhs_8, "_8yr")}
 
     # Variable 
     var = "ant2a"
 
-    # Looping through each dataset and stripping whitespace from string values 
+    # Exclude codes (-998, 998) and negative signs  and strip whitespace
     for name, (df, suffix) in bprhs_datasets.items():
         variable_name = var + suffix
         if variable_name in df.columns:
             if df[variable_name].dtype == object:
                 df[variable_name] = df[variable_name].astype(str).str.strip()
-
-
+                df[variable_name] = (
+                    pd.to_numeric(df[variable_name], errors="coerce")
+                    .replace({-998: np.nan, 998: np.nan, -97:np.nan, -98:np.nan, -99:np.nan }))
 
     # Renaming
-    df_hmz_health_bprhs_0.rename(columns={'ant2a':'hmz_ant_pounds_i_bprhs_0'}, inplace=True)
+    df_hmz_health_bprhs_0.rename(columns={'ant2a': 'hmz_ant_pounds_i_bprhs_0'}, inplace=True)
     df_hmz_health_bprhs_2.rename(columns={'ant2a_2yr': 'hmz_ant_pounds_i_bprhs_2'}, inplace=True)
     df_hmz_health_bprhs_5.rename(columns={'ant2a_5yr': 'hmz_ant_pounds_i_bprhs_5'}, inplace=True)
     df_hmz_health_bprhs_8.rename(columns={'ant2a_8yr': 'hmz_ant_pounds_i_bprhs_8'}, inplace=True)
-
 
 
     # Saving
@@ -1102,6 +1110,7 @@ def transform_health(config):
     # Dictionary with datasets and corresponding suffixes
     bprhs_datasets = {
         "Baseline": (df_hmz_health_bprhs_0, ""),
+        "2-Year": (df_hmz_health_bprhs_2, "_2yr"),
         "5-Year": (df_hmz_health_bprhs_5, "_5yr"),
         "8-Year": (df_hmz_health_bprhs_8, "_8yr")
     }
@@ -1772,38 +1781,7 @@ def transform_health(config):
     # --------------------------------------
     # BPRHS
     # --------------------------------------
-    #some of the answers in this variable are not in age
-    # bprhs v3
-    df_hmz_health_bprhs_5["studyid"] = df_hmz_health_bprhs_5["studyid"].astype(float).astype(int).astype(str)
-    studyid_0 = df_hmz_health_bprhs_5[df_hmz_health_bprhs_5["studyid"] == "0"]
-
-    if not studyid_0.empty:
-        print("vis3_dt_5yr:", studyid_0["vis3_dt_5yr"].values[0])
-        print("age_5yr:", studyid_0["age_5yr"].values[0])
-    else:
-        print("not found")
-
-    # subject 0 was 59 when first diagnosed
-
-    # bprhs_8
-    df_hmz_health_bprhs_8["studyid"] = df_hmz_health_bprhs_8["studyid"].astype(float).astype(int).astype(str)
-    studyid_0 = df_hmz_health_bprhs_8[df_hmz_health_bprhs_8["studyid"] == "0"]
-
-    if not studyid_0.empty:
-        print("vis4_dt_8yr:", studyid_0["vis4_dt_8yr"].values[0])
-        print("age_8yr:", studyid_0["age_8yr"].values[0])
-    else:
-        print("not found.")
-
-
-    # subject 0 was 31 when first diagnosed
-    # subject 0 was 67 when first diagnosed
-
-
-    print(df_hmz_health_bprhs_8['vis4_dt_8yr'])
-    print(df_hmz_health_bprhs_5['studyid'].head(20))
-
-
+    # Some values reported are not age
     # Function to convert values to integers if possible
     def safe_convert(x):
         if isinstance(x, str) and x.isdigit():  # Check if the string is a valid number
@@ -1831,16 +1809,23 @@ def transform_health(config):
 
     # Renaming
     df_hmz_health_bprhs_8.rename(columns={'med1d_8yr': 'hmz_med_1_age_bprhs_8'}, inplace=True)
-
-
     df_hmz_health_bprhs_8['hmz_med_1_age_bprhs_8'] = df_hmz_health_bprhs_8['hmz_med_1_age_bprhs_8'].replace({1986: 31})
     df_hmz_health_bprhs_8['hmz_med_1_age_bprhs_8'] = df_hmz_health_bprhs_8['hmz_med_1_age_bprhs_8'].replace({2003: 67})
 
 
-    # Saving
+    # excluding some coding values    
+    # Exclude values > 98 for age fields in BPRHS 5y and 8y
+    targets = [
+    (df_hmz_health_bprhs_5, 'hmz_med_1_age_bprhs_5'),
+    (df_hmz_health_bprhs_8, 'hmz_med_1_age_bprhs_8'),]
+
+    for df, col in targets:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+            df.loc[df[col] >= 98, col] = np.nan
+        
+     # Saving
     df_hmz_health_bprhs_5.to_csv('data/intermediate/df_hmz_health_bprhs_5.csv', index=False)
-
-
     df_hmz_health_bprhs_8.to_csv('data/intermediate/df_hmz_health_bprhs_8.csv', index=False)
 
 
@@ -3050,7 +3035,7 @@ def transform_health(config):
     # --------------------------------------
 
     # Recoding  96, 97, 98 -> as NaN
-    df_hmz_health_prospect['med19d'] = df_hmz_health_prospect['med19d'].replace({98: np.nan})
+    df_hmz_health_prospect['med19d'] = df_hmz_health_prospect['med19d'].replace({97: np.nan,98: np.nan})
 
     # Renaming
     df_hmz_health_prospect.rename(columns={'med19d': 'hmz_med_kidney_disease_today_prospect'}, inplace=True)
@@ -4565,46 +4550,50 @@ def transform_health(config):
     # --------------------------------------
     # BPRHS
     # --------------------------------------
-    #These variables exist in baseline but refer to other survey questions so they are not included here
-    base_variables = ["tob5_1","tob5_2","tob5_3","tob5_4"]
 
-    bprhs_datasets = {
-        #"Baseline": (df_hmz_health_bprhs_0, ""),
-       # "2-Year": (df_hmz_health_bprhs_2, "_2yr"),
-        "5-Year": (df_hmz_health_bprhs_5, "_5yr"),
-        "8-Year": (df_hmz_health_bprhs_8, "_8yr") }
+    # These variables exist in baseline but refer to other survey questions, so only 5y/8y are handled here
+    base_variables = ["tob5_1", "tob5_2", "tob5_3", "tob5_4"]
 
 
+    tob5_cols_5yr = [f"{v}_5yr" for v in base_variables]
+    tob5_cols_8yr = [f"{v}_8yr" for v in base_variables]
 
+    # --- Recoding 97/98/99 -> NaN  ---
 
-    df_hmz_health_bprhs_5.rename(columns={ "tob5_1_5yr":"hmz_hb_tobacco_home_bprhs_5",
-                  "tob5_2_5yr":"hmz_hb_tobacco_work_bprhs_5",
-                  "tob5_3_5yr":"hmz_hb_tobacco_car_bprhs_5",
-                  "tob5_4_5yr":"hmz_hb_tobacco_other_bprhs_5"}, inplace=True)
+    # v3
+    for col in tob5_cols_5yr:
+        if col in df_hmz_health_bprhs_5.columns:
+            df_hmz_health_bprhs_5[col] = (
+            df_hmz_health_bprhs_5[col].astype(str).str.strip()
+            .replace({"97": np.nan, "98": np.nan, "99": np.nan}))
+        df_hmz_health_bprhs_5[col] = pd.to_numeric(df_hmz_health_bprhs_5[col], errors="coerce") \
+            .replace({97: np.nan, 98: np.nan, 99: np.nan})
 
+    # v4
+    for col in tob5_cols_8yr:
+        if col in df_hmz_health_bprhs_8.columns:
+            df_hmz_health_bprhs_8[col] = (
+            df_hmz_health_bprhs_8[col].astype(str).str.strip()
+            .replace({"97": np.nan, "98": np.nan, "99": np.nan}))
+        df_hmz_health_bprhs_8[col] = pd.to_numeric(df_hmz_health_bprhs_8[col], errors="coerce") \
+            .replace({97: np.nan, 98: np.nan, 99: np.nan})
 
-    df_hmz_health_bprhs_8.rename(columns={ "tob5_1_8yr":"hmz_hb_tobacco_home_bprhs_8",
-                  "tob5_2_8yr":"hmz_hb_tobacco_work_bprhs_8",
-                  "tob5_3_8yr":"hmz_hb_tobacco_car_bprhs_8",
-                  "tob5_4_8yr":"hmz_hb_tobacco_other_bprhs_8"}, inplace=True)
+    # Renaming
 
+    df_hmz_health_bprhs_5.rename(columns={
+    "tob5_1_5yr": "hmz_hb_tobacco_home_bprhs_5",
+    "tob5_2_5yr": "hmz_hb_tobacco_work_bprhs_5",
+    "tob5_3_5yr": "hmz_hb_tobacco_car_bprhs_5",
+    "tob5_4_5yr": "hmz_hb_tobacco_other_bprhs_5",}, inplace=True)
 
-    #Recode  values:  97, 98 -> NaN
-    for var in base_variables:
-      if var in df_hmz_health_bprhs_5.columns:
-            df_hmz_health_bprhs_5[var] = df_hmz_health_bprhs_5[var].replace({97: np.nan, 98: np.nan, 99: np.nan})
+    df_hmz_health_bprhs_8.rename(columns={
+    "tob5_1_8yr": "hmz_hb_tobacco_home_bprhs_8",
+    "tob5_2_8yr": "hmz_hb_tobacco_work_bprhs_8",
+    "tob5_3_8yr": "hmz_hb_tobacco_car_bprhs_8",
+    "tob5_4_8yr": "hmz_hb_tobacco_other_bprhs_8",}, inplace=True)
 
-
-    for var in base_variables:
-      if var in df_hmz_health_bprhs_8.columns:
-            df_hmz_health_bprhs_8[var] = df_hmz_health_bprhs_8[var].replace({97: np.nan, 98: np.nan, 99: np.nan})
-
-
-
-    # Saving 
+    # Saving
     df_hmz_health_bprhs_5.to_csv('data/intermediate/df_hmz_health_bprhs_5.csv', index=False)
-
-
     df_hmz_health_bprhs_8.to_csv('data/intermediate/df_hmz_health_bprhs_8.csv', index=False)
 
 
@@ -4621,6 +4610,13 @@ def transform_health(config):
     for var in base_variables:
       if var in df_hmz_health_prospect.columns:
             df_hmz_health_prospect[var] = df_hmz_health_prospect[var].replace({96: np.nan, 97: np.nan, 98: np.nan})
+
+    # Recoding to harmonize with corresponding bprhs tobacco variables       
+    # Recoding 
+    df_hmz_health_prospect[base_variables] = df_hmz_health_prospect[base_variables].replace({0:5, 1:4, 2:3, 3:2, 4:1 })
+
+    # Saving
+    df_hmz_health_prospect.to_csv('data/intermediate/df_hmz_health_prospect.csv', index=False)
 
 
 
@@ -4778,10 +4774,17 @@ def transform_health(config):
     # Saving
     df_hmz_health_bprhs_5.to_csv('data/intermediate/df_hmz_health_bprhs_5.csv', index=False)
 
+    # recoding
+    
+    df_hmz_health_bprhs_5['slp4_5yr'] = df_hmz_health_bprhs_5['slp4_5yr'].replace({1:0, 2:1, 3:2, 4:3, 5:4})
+
+    
+    # Saving
+    df_hmz_health_bprhs_5.to_csv('data/intermediate/df_hmz_health_bprhs_5.csv', index=False)
 
 
     # Renaming 
-    # Renamingin 5yr dataset
+    # Renaming 5yr dataset
 
     df_hmz_health_bprhs_5.rename(columns={  "slp1_5yr":"hmz_hb_slp1_bprhs_5",
                   "slp2_5yr":"hmz_hb_slp2_bprhs_5",
@@ -5436,11 +5439,18 @@ def transform_health(config):
 
 
     #  hip circumference
+    # Transformation
+    # Using a filter in case some units are in cm
+    filter = df_hmz_health_prospect_english["hc_avg"] > 80
+    df_hmz_health_prospect_english.loc[filter, "hc_avg"] = (
+    df_hmz_health_prospect_english.loc[filter, "hc_avg"] * 0.393701)
+    print(f"Converted {filter.sum()} PROSPECT English hip values from cm to inches")
+
     # Renaming
     df_hmz_health_prospect_english.rename(columns={'hc_avg': 'hmz_ant_hip_prospect'}, inplace=True)
+
     # Saving
     df_hmz_health_prospect_english.to_csv('data/intermediate/df_hmz_health_prospect_english.csv', index=False)
-
 
 
     # cholesterol
@@ -6126,15 +6136,15 @@ def transform_health(config):
 
     # Recoding and renaming other tobacco-related variables
     tobacco_vars = {
-        "tob12": "hmz_hb_tobacco_home_prospect",
-        "tob13": "hmz_hb_tobacco_work_prospect",
-        "tob14": "hmz_hb_tobacco_car_prospect",
-        "tob15": "hmz_hb_tobacco_other_prospect"
-    }
+    "tob12": "hmz_hb_tobacco_home_prospect",
+    "tob13": "hmz_hb_tobacco_work_prospect",
+    "tob14": "hmz_hb_tobacco_car_prospect",
+    "tob15": "hmz_hb_tobacco_other_prospect"}
 
     for old, new in tobacco_vars.items():
         if old in df_hmz_health_prospect_english.columns:
             df_hmz_health_prospect_english[old] = df_hmz_health_prospect_english[old].replace({96: np.nan, 97: np.nan, 98: np.nan})
+            df_hmz_health_prospect_english[old] = df_hmz_health_prospect_english[old].replace({0:5, 1:4, 2:3, 3:2, 4:1})
             df_hmz_health_prospect_english.rename(columns={old: new}, inplace=True)
 
     # Saving

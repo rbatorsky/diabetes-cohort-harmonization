@@ -22,9 +22,162 @@ def transform_sdoh(config):
     df_hmz_sdoh_bprhs_5 = data['bprhs_5']
     df_hmz_sdoh_bprhs_8 = data['bprhs_8']
     df_hmz_sdoh_prospect = data['prospect']
-                            
+       
+
+     # ============================================================================================
+     #  Days since Visit 1 (NOT A SDOH but a GENERAL VARIABLE)
+     # ============================================================================================
+
+    # --------------------------------------
+    # BPRHS
+    # --------------------------------------
+    
+    # baseline
+    df_hmz_sdoh_bprhs_0["vis1_dt"] = pd.to_datetime(
+    df_hmz_sdoh_bprhs_0["vis1_dt"], errors="coerce")
+
+    # Create baseline map: studyid -> baseline date
+    baseline_map = (
+        df_hmz_sdoh_bprhs_0[["studyid", "vis1_dt"]]
+        .dropna(subset=["vis1_dt"])
+        .assign(studyid=lambda d: d["studyid"].astype(str))
+        .set_index("studyid")["vis1_dt"]
+        .to_dict())
+
+    # Everyone at baseline is 0 days since visit 1
+    df_hmz_sdoh_bprhs_0["hmz_days_since_visit_1_bprhs_0"] = 0
+    df_hmz_sdoh_bprhs_0["hmz_days_since_visit_1_bprhs_0"] = (
+        pd.to_numeric(df_hmz_sdoh_bprhs_0["hmz_days_since_visit_1_bprhs_0"], errors="coerce")
+        .astype("Int64"))
+
+    # 2 year
+
+    df_hmz_sdoh_bprhs_2["vis2_dt_2yr"] = pd.to_datetime(
+        df_hmz_sdoh_bprhs_2["vis2_dt_2yr"], errors="coerce")
+
+    
+    df_hmz_sdoh_bprhs_2["_baseline_date"] = (
+        df_hmz_sdoh_bprhs_2["studyid"].astype(str).map(baseline_map))
+
+
+    df_hmz_sdoh_bprhs_2["hmz_days_since_visit_1_bprhs_2"] = (
+        df_hmz_sdoh_bprhs_2["vis2_dt_2yr"] - df_hmz_sdoh_bprhs_2["_baseline_date"]
+        ).dt.days
+
+    df_hmz_sdoh_bprhs_2["hmz_days_since_visit_1_bprhs_2"] = pd.to_numeric(
+        df_hmz_sdoh_bprhs_2["hmz_days_since_visit_1_bprhs_2"], errors="coerce"
+        ).astype("Int64")
+
+
+    df_hmz_sdoh_bprhs_2.drop(columns=["_baseline_date"], inplace=True)
+
+# 5 year
+
+
+    df_hmz_sdoh_bprhs_5["vis3_dt_5yr"] = pd.to_datetime(
+    df_hmz_sdoh_bprhs_5["vis3_dt_5yr"], errors="coerce")
+
+    df_hmz_sdoh_bprhs_5["_baseline_date"] = (
+    df_hmz_sdoh_bprhs_5["studyid"].astype(str).map(baseline_map))
+
+    df_hmz_sdoh_bprhs_5["hmz_days_since_visit_1_bprhs_5"] = (
+    df_hmz_sdoh_bprhs_5["vis3_dt_5yr"] - df_hmz_sdoh_bprhs_5["_baseline_date"]).dt.days
+
+    df_hmz_sdoh_bprhs_5["hmz_days_since_visit_1_bprhs_5"] = pd.to_numeric(
+    df_hmz_sdoh_bprhs_5["hmz_days_since_visit_1_bprhs_5"], errors="coerce").astype("Int64")
+
+    df_hmz_sdoh_bprhs_5.drop(columns=["_baseline_date"], inplace=True)
+
+# 8 year
+
+
+    df_hmz_sdoh_bprhs_8["vis4_dt_8yr"] = pd.to_datetime(
+    df_hmz_sdoh_bprhs_8["vis4_dt_8yr"], errors="coerce")
+
+    df_hmz_sdoh_bprhs_8["_baseline_date"] = (
+    df_hmz_sdoh_bprhs_8["studyid"].astype(str).map(baseline_map))
+
+    df_hmz_sdoh_bprhs_8["hmz_days_since_visit_1_bprhs_8"] = (
+    df_hmz_sdoh_bprhs_8["vis4_dt_8yr"] - df_hmz_sdoh_bprhs_8["_baseline_date"]).dt.days
+
+    df_hmz_sdoh_bprhs_8["hmz_days_since_visit_1_bprhs_8"] = pd.to_numeric(
+    df_hmz_sdoh_bprhs_8["hmz_days_since_visit_1_bprhs_8"], errors="coerce").astype("Int64")
+
+    df_hmz_sdoh_bprhs_8.drop(columns=["_baseline_date"], inplace=True)
+
+    # Saving
+    df_hmz_sdoh_bprhs_0.to_csv('data/intermediate/df_hmz_sdoh_bprhs_0.csv', index=False)
+    df_hmz_sdoh_bprhs_2.to_csv('data/intermediate/df_hmz_sdoh_bprhs_2.csv', index=False)
+    df_hmz_sdoh_bprhs_5.to_csv('data/intermediate/df_hmz_sdoh_bprhs_5.csv', index=False)
+    df_hmz_sdoh_bprhs_8.to_csv('data/intermediate/df_hmz_sdoh_bprhs_8.csv', index=False)
+
+
+
+    # --------------------------------------
+    # PROSPECT
+    # --------------------------------------
+      
+    # --------------------------------------
+    # days since visit 1
+    # --------------------------------------
+    
+    # normalizing 
+    key = df_hmz_sdoh_prospect["studyid"].astype(str)
+    events = (
+    df_hmz_sdoh_prospect["redcap_event_name"]
+    .astype(str)
+    .str.strip()
+    .str.lower())
+    
+    dates = pd.to_datetime(df_hmz_sdoh_prospect["gen1"], errors="coerce")
+
+    # keeping only baseline & visit 2 rows with valid dates
+    keep_ev = ["baseline_arm_1", "visit_2_arm_1"]
+    sub = pd.DataFrame({"studyid": key, "event": events, "date": dates})
+    sub = sub[sub["event"].isin(keep_ev)].dropna(subset=["date"])
+
+    # earliest date per (studyid, event)
+    per_event = (
+    sub.groupby(["studyid", "event"], as_index=False, sort=False)["date"]
+    .min())
+
+    # computing baseline date per participant
+    wide = per_event.pivot(index="studyid", columns="event", values="date")
+    baseline = wide.get("baseline_arm_1")
+    baseline_map = baseline.to_dict() if isinstance(baseline, pd.Series) else {}
+
+    # final column
+    new_col = "hmz_days_since_visit_1_prospect"
+
+    # cleaning
+    prefixed_old = "hmz_sdoh_days_since_visit_1_prospect"
+    if prefixed_old in df_hmz_sdoh_prospect.columns:
+            df_hmz_sdoh_prospect.rename(
+        columns={prefixed_old: new_col},
+        inplace=True )
+
+    # computing days since baseline
+    df_hmz_sdoh_prospect[new_col] = (
+    dates - key.map(baseline_map)).dt.days
+
+    # forcing baseline rows to 0
+    df_hmz_sdoh_prospect.loc[
+    events.eq("baseline_arm_1"),
+    new_col] = 0
+
+    # converting to nullable Int64
+    df_hmz_sdoh_prospect[new_col] = pd.to_numeric(
+    df_hmz_sdoh_prospect[new_col],
+    errors="coerce").astype("Int64")
+
+    # saving
+    df_hmz_sdoh_prospect.to_csv(
+    "data/intermediate/df_hmz_sdoh_prospect.csv",
+    index=False)
+
+                     
     # ============================================================================================
-    #  Gender
+    #  Sex
     # ============================================================================================
 
     # --------------------------------------
@@ -35,15 +188,15 @@ def transform_sdoh(config):
                             (df_hmz_sdoh_bprhs_2, 'female', 'bprhs_2'),
                             (df_hmz_sdoh_bprhs_5, 'female', 'bprhs_5'),
                             (df_hmz_sdoh_bprhs_8, 'female_8yr', 'bprhs_8')]:
-        df.rename(columns={col: f'hmz_gender_{suffix}'}, inplace=True)
+        df.rename(columns={col: f'hmz_sex_{suffix}'}, inplace=True)
         df.to_csv(f'data/intermediate/df_hmz_sdoh_{suffix}.csv', index=False)
 
-
+   
     # --------------------------------------
     # PROSPECT
     # --------------------------------------
     # Renaming the variables
-    df_hmz_sdoh_prospect.rename(columns={'dem3': 'hmz_gender_prospect'}, inplace=True)
+    df_hmz_sdoh_prospect.rename(columns={'dem3': 'hmz_sex_prospect'}, inplace=True)
     df_hmz_sdoh_prospect.to_csv('data/intermediate/df_hmz_sdoh_prospect.csv', index=False)
     # ============================================================================================
     #  Age
@@ -80,7 +233,7 @@ def transform_sdoh(config):
     # Transformation 1: Recoding  don't know/not sure and refused as nan ---------------------------
     base_variables = [
         "nfa8r", "nfa8s", "nfa9a", "nfa9b", "nfa9c", "nfa9d", "nfa8q", "nfa8p",
-        "nfa4a", "nfa4b", "nfa4c", "nfa4d", "nfa4e", "nfa4f", "nfa4g", "nfa4h", "nfa4i", "nfa4j", "nfa4k"
+        "nfa4a", "nfa4b", "nfa4c", "nfa4d", "nfa4e", "nfa4f", "nfa4g", "nfa4h", "nfa4i", "nfa4j", "nfa4k",'nfa8h'
     ]
 
     for var in base_variables:
@@ -294,17 +447,18 @@ def transform_sdoh(config):
     # Checking variables
     base_variables = ["hc1", "hc1b", "hc1c", "hc8"]
     suffixes = {
-        "bprhs_0": (df_hmz_sdoh_bprhs_0, ""),
-        "bprhs_2": (df_hmz_sdoh_bprhs_2, "_2yr"),
-        "bprhs_5": (df_hmz_sdoh_bprhs_5, "_5yr"),
-        "bprhs_8": (df_hmz_sdoh_bprhs_8, "_8yr")
-    }
+    "bprhs_0": (df_hmz_sdoh_bprhs_0, ""),
+    "bprhs_2": (df_hmz_sdoh_bprhs_2, "_2yr"),
+    "bprhs_5": (df_hmz_sdoh_bprhs_5, "_5yr"),
+    "bprhs_8": (df_hmz_sdoh_bprhs_8, "_8yr"),}
 
-    # Recoding value 2 → NaN for 'hc8'
+    # Recoding: set 2 and 6 -> NaN for hc8 across all visits
     for _, (df, suffix) in suffixes.items():
-        colname = f"hc8{suffix}"
-        if colname in df.columns:
-            df[colname] = df[colname].replace({2: np.nan})
+        col = f"hc8{suffix}"
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").replace({2: np.nan, 6: np.nan})
+
+    
 
     # Renaming variables
     for key, (df, suffix) in suffixes.items():
@@ -454,7 +608,7 @@ def transform_sdoh(config):
 
     # Function to transform the dataset
     def transform_occupation(df, suffix):
-        col_name = f"whi7"  
+        col_name = "whi7"  
         df[f"hmz_whi_occupation_{suffix}"] = df[col_name].apply(categorize_occupation)  
 
     # Applying transformation to df_hmz_sdoh_prospect
@@ -475,12 +629,40 @@ def transform_sdoh(config):
     # BPRHS
     # --------------------------------------
     # Transformation 1: Cleaning some variables
-    # soc2a_5yr 
-    df_hmz_sdoh_bprhs_5['soc2a_5yr'] = df_hmz_sdoh_bprhs_5['soc2a_5yr'].replace([-98, -99, 'No sabe'], np.nan)
+
+    # Transformation 1: Cleaning some variables
+
+    # soc2a (baseline): set 98 -> NaN
+    if 'soc2a' in df_hmz_sdoh_bprhs_0.columns:
+        df_hmz_sdoh_bprhs_0['soc2a'] = (
+        pd.to_numeric(df_hmz_sdoh_bprhs_0['soc2a'], errors='coerce')
+          .replace({98: np.nan,99: np.nan})
+          .replace({'No sabe': np.nan}))
+
+    # soc2a_2yr: set 99 -> NaN
+    if 'soc2a_2yr' in df_hmz_sdoh_bprhs_2.columns:
+        df_hmz_sdoh_bprhs_2['soc2a_2yr'] = (
+        pd.to_numeric(df_hmz_sdoh_bprhs_2['soc2a_2yr'], errors='coerce')
+          .replace({98: np.nan,99: np.nan})
+          .replace({'No sabe': np.nan}))
+
+    # soc2a_5yr: set -98, -99 -> NaN
+    if 'soc2a_5yr' in df_hmz_sdoh_bprhs_5.columns:
+        df_hmz_sdoh_bprhs_5['soc2a_5yr'] = (
+        pd.to_numeric(df_hmz_sdoh_bprhs_5['soc2a_5yr'], errors='coerce')
+          .replace({-98: np.nan, -99: np.nan, 98: np.nan, 99: np.nan})
+          .replace({'No sabe': np.nan}))
 
     # soc2a_8yr 
-    df_hmz_sdoh_bprhs_8['soc2a_8yr'] = df_hmz_sdoh_bprhs_8['soc2a_8yr'].replace([-98, -99, '1:30', '1:15'], np.nan)
+    df_hmz_sdoh_bprhs_8['soc2a_8yr'] = df_hmz_sdoh_bprhs_8['soc2a_8yr'].replace([-98, -99, 98, 99, '1:30', '1:15'], np.nan)
 
+    df_hmz_sdoh_bprhs_0.to_csv('data/intermediate/df_hmz_sdoh_bprhs_0.csv', index=False)
+    df_hmz_sdoh_bprhs_2.to_csv('data/intermediate/df_hmz_sdoh_bprhs_2.csv', index=False)
+    df_hmz_sdoh_bprhs_5.to_csv('data/intermediate/df_hmz_sdoh_bprhs_5.csv', index=False)
+    df_hmz_sdoh_bprhs_8.to_csv('data/intermediate/df_hmz_sdoh_bprhs_8.csv', index=False)
+
+
+    
     # soc2b_5yr
     cleanup_map = {
         'Minutos': 1,
@@ -505,7 +687,8 @@ def transform_sdoh(config):
         'Weekly': 4,
         'A la semana': 4,
         'Daily': 5,
-        'Al dia': 5}
+        'Al dia': 5,
+        9:1}
 
     df_hmz_sdoh_bprhs_5['soc3b_5yr'] = df_hmz_sdoh_bprhs_5['soc3b_5yr'].replace(soc3b_5yr_map)
 
@@ -521,12 +704,16 @@ def transform_sdoh(config):
         'Weekly': 4,
         'A la semana': 4,
         'Daily': 5,
-        'Al dia': 5}
+        'Al dia': 5,
+        9:1}
 
 
     df_hmz_sdoh_bprhs_5['soc4b_5yr'] = df_hmz_sdoh_bprhs_5['soc4b_5yr'].replace(soc4b_5yr_map)
 
+    df_hmz_sdoh_bprhs_0.to_csv('data/intermediate/df_hmz_sdoh_bprhs_0.csv', index=False)
+    df_hmz_sdoh_bprhs_2.to_csv('data/intermediate/df_hmz_sdoh_bprhs_2.csv', index=False)
     df_hmz_sdoh_bprhs_5.to_csv('data/intermediate/df_hmz_sdoh_bprhs_5.csv', index=False)
+    df_hmz_sdoh_bprhs_8.to_csv('data/intermediate/df_hmz_sdoh_bprhs_8.csv', index=False)
 
 
 
@@ -541,7 +728,8 @@ def transform_sdoh(config):
         'Weekly': 4,
         'A la semana': 4,
         'Daily': 5,
-        'Al dia': 5}
+        'Al dia': 5,
+        9:1}
 
 
     df_hmz_sdoh_bprhs_5['soc5b_5yr'] = df_hmz_sdoh_bprhs_5['soc5b_5yr'].replace(soc5b_5yr_map)
@@ -566,20 +754,63 @@ def transform_sdoh(config):
     df_hmz_sdoh_bprhs_8.to_csv('data/intermediate/df_hmz_sdoh_bprhs_8.csv', index=False)
 
 
+    #soc4a
 
+    soc4a_vars = {
+    "Baseline": (df_hmz_sdoh_bprhs_0, "soc4a"),
+    "2-Year": (df_hmz_sdoh_bprhs_2, "soc4a_2yr"),
+    "5-Year": (df_hmz_sdoh_bprhs_5, "soc4a_5yr"),
+    "8-Year": (df_hmz_sdoh_bprhs_8, "soc4a_8yr"),}
+
+
+    for name, (df, col) in soc4a_vars.items():
+        if col in df.columns:
+            df[col] = df[col].replace(98, np.nan)
+            print(f"Replaced 98 with NaN in {col} ({name})")
+
+    # Saving
+    df_hmz_sdoh_bprhs_0.to_csv('data/intermediate/df_hmz_sdoh_bprhs_0.csv', index=False)
+    df_hmz_sdoh_bprhs_2.to_csv('data/intermediate/df_hmz_sdoh_bprhs_2.csv', index=False)
+    df_hmz_sdoh_bprhs_5.to_csv('data/intermediate/df_hmz_sdoh_bprhs_5.csv', index=False)
+    df_hmz_sdoh_bprhs_8.to_csv('data/intermediate/df_hmz_sdoh_bprhs_8.csv', index=False)
 
     # Transformation 2: Recoding
 
-    variables_to_transform = ['soc3b', 'soc4b', 'soc5b']
-
+    # --- Define mappings ---
     transformation_map = {1: 5, 2: 4, 4: 2, 9: 1}
 
+    # --- Visit 0 (baseline) ---
+    variables_to_transform_0 = ['soc3b', 'soc4b', 'soc5b']
+    for var in variables_to_transform_0:
+        if var in df_hmz_sdoh_bprhs_0.columns:
+            df_hmz_sdoh_bprhs_0[var] = df_hmz_sdoh_bprhs_0[var].replace(transformation_map)
+            print(f"\nValue counts after transformation for {var} (BPRHS_0):")
+            print(df_hmz_sdoh_bprhs_0[var].value_counts(dropna=False))
 
-    for var in variables_to_transform:
-        df_hmz_sdoh_bprhs_0[var] = df_hmz_sdoh_bprhs_0[var].replace(transformation_map)
-        # Check value counts after transformation
-        print(f"\nValue counts after transformation for {var}:")
-        print(df_hmz_sdoh_bprhs_0[var].value_counts(dropna=False))
+    # --- Visit 2 (2-year) ---
+    variables_to_transform_2 = ['soc3b_2yr', 'soc4b_2yr', 'soc5b_2yr']
+    for var in variables_to_transform_2:
+        if var in df_hmz_sdoh_bprhs_2.columns:
+            df_hmz_sdoh_bprhs_2[var] = df_hmz_sdoh_bprhs_2[var].replace(transformation_map)
+            print(f"\nValue counts after transformation for {var} (BPRHS_2):")
+            print(df_hmz_sdoh_bprhs_2[var].value_counts(dropna=False))
+
+    # --- Visit 8 (8-year) ---
+    variables_to_transform_8 = ['soc3b_8yr', 'soc4b_8yr', 'soc5b_8yr']
+    for var in variables_to_transform_8:
+        if var in df_hmz_sdoh_bprhs_8.columns:
+            df_hmz_sdoh_bprhs_8[var] = df_hmz_sdoh_bprhs_8[var].replace(transformation_map)
+            print(f"\nValue counts after transformation for {var} (BPRHS_8):")
+            print(df_hmz_sdoh_bprhs_8[var].value_counts(dropna=False))
+
+
+    # saving
+    df_hmz_sdoh_bprhs_0.to_csv('data/intermediate/df_hmz_sdoh_bprhs_0.csv', index=False)
+    df_hmz_sdoh_bprhs_2.to_csv('data/intermediate/df_hmz_sdoh_bprhs_2.csv', index=False)
+    df_hmz_sdoh_bprhs_8.to_csv('data/intermediate/df_hmz_sdoh_bprhs_8.csv', index=False)
+
+
+
 
 
     # renaming
@@ -655,10 +886,6 @@ def transform_sdoh(config):
     # renaming the variable in bprhs v1
     df_hmz_sdoh_bprhs_0.rename(columns={'soc_activities': 'hmz_soc_activities_bprhs_0'}, inplace=True)
             
-    # variables to sum for creating soc_activities for bprhs v3 and v4
-    variables_to_sum = ["soc16", "soc17","soc172_962" , "soc18", "soc20", "soc21",
-        "soc22", "soc23", "soc24", "soc25", "soc26", "soc27", "soc28"]
-
 
     # bprhs v3
     variables_to_recode_5 = [   "soc16_5yr", "soc17_5yr", "soc172_962_5yr", "soc18_5yr", "soc20_5yr", "soc21_5yr",
@@ -1004,6 +1231,7 @@ def transform_sdoh(config):
     for dataset_name, (df, _) in bprhs_datasets.items():
         df.columns = df.columns.str.lower().str.strip()
 
+    
 
     # Renaming columns 
     df_hmz_sdoh_bprhs_0.rename(columns={'emo2_1': 'hmz_soc_emo2_1_bprhs_0',
@@ -1842,28 +2070,35 @@ def transform_sdoh(config):
         "pdq_4i", "pdq_4it", "pdq_2i", "pdq_2it", "pdq_2j", "pdq_4j"
     ]
 
-    # Recode 97 and 98 as 99 in 5-Year dataset
+
     for var in base_variables:
-        var_with_suffix = var + "_5yr"
-        if var_with_suffix in df_hmz_sdoh_bprhs_5.columns:
-            df_hmz_sdoh_bprhs_5[var_with_suffix] = df_hmz_sdoh_bprhs_5[var_with_suffix].astype(str).str.strip()
-            df_hmz_sdoh_bprhs_5[var_with_suffix] = df_hmz_sdoh_bprhs_5[var_with_suffix].apply(
-                lambda x: 99 if x in ['97', '98'] else x
-            )
+        col = var + "_5yr"
+    if col in df_hmz_sdoh_bprhs_5.columns:
+        df = df_hmz_sdoh_bprhs_5
+        numeric = pd.to_numeric(df[col], errors="coerce")
+        df[col] = np.where(numeric.isin([97, 98]), 99, df[col])
+
 
     # Recode options in 'pdq_2j_5yr': 1→0, 2→1, 3→2, 4→3
-    df_hmz_sdoh_bprhs_5['pdq_2j_5yr'] = df_hmz_sdoh_bprhs_5['pdq_2j_5yr'].replace({
-        1: 0, 2: 1, 3: 2, 4: 3
-    })
+    if 'pdq_2j_5yr' in df_hmz_sdoh_bprhs_5.columns:
+        df_hmz_sdoh_bprhs_5['pdq_2j_5yr'] = (
+            pd.to_numeric(df_hmz_sdoh_bprhs_5['pdq_2j_5yr'], errors="coerce")
+          .replace({1: 0, 2: 1, 3: 2, 4: 3}))
 
-    # Recode options in 'pdq_4j_5yr': 1→0, 2→1, 3→2, 4→3
-    df_hmz_sdoh_bprhs_5['pdq_4j_5yr'] = df_hmz_sdoh_bprhs_5['pdq_4j_5yr'].replace({
-        1: 0, 2: 1, 3: 2, 4: 3
-    })
 
+        
     # Save the transformed DataFrame
     df_hmz_sdoh_bprhs_5.to_csv('data/intermediate/df_hmz_sdoh_bprhs_5.csv', index=False)
 
+
+    # Recode options in 'pdq_4j_5yr': 1→0, 2→1, 3→2, 4→3
+    if 'pdq_4j_5yr' in df_hmz_sdoh_bprhs_5.columns:
+        df_hmz_sdoh_bprhs_5['pdq_4j_5yr'] = (
+        pd.to_numeric(df_hmz_sdoh_bprhs_5['pdq_4j_5yr'], errors="coerce")
+          .replace({1: 0, 2: 1, 3: 2, 4: 3}))
+
+    # Save the transformed DataFrame
+    df_hmz_sdoh_bprhs_5.to_csv('data/intermediate/df_hmz_sdoh_bprhs_5.csv', index=False)
 
 
     # Transformation 2: Categorizing the text variables
@@ -2139,7 +2374,7 @@ def transform_sdoh(config):
         "pdq1a", "pdq1b", "pdq1c", "pdq1d", "pdq1e", "pdq1f", "pdq1g", "pdq1h",
         "pdq2a", "pdq2b", "pdq2c", "pdq2d", "pdq2e", "pdq2f", "pdq2g", "pdq2h",
         "pdq2h1", "pdq3a", "pdq3b", "pdq3c", "pdq3d", "pdq3e", "pdq4a", "pdq4b",
-        "pdq4c", "pdq4d", "pdq4e", "pdq4f", "pdq4g", "pdq4h", "pdq4i", "pdq4h1",
+        "pdq4c", "pdq4d", "pdq4e", "pdq4f", "pdq4g", "pdq4h", "pdq4i",
         "pdq2i","pdq2j", "pdq4i1", "pdq4j"
     ]
 
@@ -2153,134 +2388,6 @@ def transform_sdoh(config):
 
         
     # Categorizing
-    # pdq4h1
-
-    discrimination_reasons_4 = {'Physical or Health-Related Conditions': [
-            'por el vih', 'hiv', 'por ser hiv', 'por ser HIV.', 'the participant is HIV positive',
-            'nepotismo y dado su aflicion de HIV', 'por tener espejuelos', 'problema de salud mental',
-            'condicion de salud mental', 'condicion fisica', 'por discapacidad', 'impedimento',
-            'impedimento.', 'por condición médica', 'por condición medica.', 'por condición medica, favoritismo, por falta de empatía',
-            'por condición de salud mental', 'porque los niños la molestaban sin razón', 'condiciones medicas',
-            'por su problema de audición.', 'problemas con la autoridad o con seguir ordenes dadas',
-            'problemas de salud-depresion', 'condición médica', 'diagnóstico medico', 'razones de salud',
-            'health issues', 'situación de salud', 'problemas de salud', 'condición socioeconómica y salud',
-            'debido a su diagnóstico de VIH', 'condición de salud en el trabajo'
-        ],
-    
-        'Bullying & Harassment': [
-            'bullying', 'bullying y prepotencia', 'bullying en la escuela', 'bullying de niños',
-            'bullying y problemas laborales', 'bullying y envidia', 'bullying y tacticas de abogados',
-            'bullying en la escuela', 'bulling en la escuela', 'bullying, diferencias laborales',
-            'sobrenombres', 'acoso', 'acoso en la escuela por ser estudiosa.', 'acoso de niño',
-            'preferencia de maestros a estudiantes', 'abuso de poder (gerente)', 'abuso de poder',
-            'tratan de minimizar a la participante', 'celos academicos'
-        ],
-
-        'Work-Related Issues': [
-            'work issues', 'nepotismo en su área de trabajo.', 'hostigamiento, más trabajo por igual paga',
-            'trabajo: personas malintencionadas', 'laboral conditions', 'malas condiciones laborales.',
-            'trabajo de ventas.', 'problemas laborales con situaciones interinas', 'maltrato en el sistema de salud',
-            'explotacion laboral', 'conflicto en el trabajo', 'puesto de trabajo y política', 
-            'competencia laboral; agencias gubernamentales la trataron como si fuera deshonesta y negligente..',
-            'su actitud.', 'conflicto en el trabajo como directora en empleo anterior',
-            'en el empleo, por excederse en sus responsabilidades.', 'condición de salud en el trabajo',
-            'presión social por parte de amistades', 'por su posicion en el trabajo', 'injusticias en proceso de vivienda',
-            'supervisora queria que hicieran las cosas tal y como ella decia', 'los demás se creían mejores. que la participante.'
-        ],
-
-        'Social & Personal Conflicts': [
-            'subestimacion', 'subrtimacion', 'por envidia', 'envidia', 'celos profesionales', 'celos profesionales en el trabajo',
-            'competencia', 'inteligencia percibida en la escuela(competencia) participante tiene un gemela',
-            'porque te ven como competencia', 'su actitud.', 'por la manera de ser', 'actitud general', 
-            'por su carácter.', 'problemas personales.', 'por probatoria', 'por su problema de audición.',
-            'actitudes', 'actitud.', 'personalidad jovial.', 'falta de madurez', 'presión social',
-            'envidia y celos', 'celos profesionales, religion.', 'diferencias en la sociedad', 'competencia entre profesionales',
-            'porque decian que era nerd', 'envy', 'competencia profesional', 'personalidad, chisme del trabajo',
-            'en el parto no dejaron que se pegara a su bebé.', 'envidia profesional.', 'falta de madurez (trabajo)/ medico (trato no profesional)'
-        ],
-
-        'Family & Domestic Issues': [
-            'familiares', 'personal relationship problems', 'problemas familiares', 'por su desesperacion',
-            'familiares', 'situaciones familiares', 'su prioridad son sus hijos y no le respetaban por eso',
-            'porque no le dieron oportunidad de vivir en un apartamento', 'porque no le dieron oportunidad de vivir en un apartamento'
-        ],
-
-        'Legal & Authority-Related Issues': [
-            'personal issues with police men', 'burocracia gubernamental.', 'burocracia del departamento de educacion',
-            'el patrono obstaculizó sus visitas al fondo de seguro del estado por lesión en el empleo',
-            'discriminado en el tribunal por problema en trabajo', 'injusticia', 'situaciones políticas',
-            'problemas con abogado de la otra parte', 'razones políticas.', 'razones de salud',
-            'injusticia familiar', 'secuestro infantil', 'impericia medica', 'despido injustificado',
-            'injusticias en proceso de vivienda', 'razones políticas.', 'razones politicas.', 'razones políticas.',
-            'presión social por parte de amistades'
-        ],
-
-        'Religious or Cultural Beliefs': [
-            'religion', 'religion y apariencia fisica', 'religious views', 'creencias religiosas', 
-            'afiliaciones religiosas', 'religión'
-        ],
-
-        'Economic or Financial Issues': [
-            'por la situación económica', 'por lo económico', 'estatus socioeconómico', 'status social',
-            'discriminado por el ingreso', 'estatus socioeconómico.', 'por ingresos', 'situaciones económicas y condiciones de salud',
-            'nivel económico, condiciones médicas', 'discriminacion por estatus socioeconomico'
-        ],
-
-        'Political Beliefs & Affiliations': [
-            'politica', 'política', 'situación política', 'por razones politicas', 'political affiliations',
-            'political differences', 'diferencias politicas', 'afiliación política', 'posturas politicas',
-            'motivos ideológicos.', 'afiliaciones políticas'
-        ],
-
-        'Doesn\'t Know / No Specific Reason': [
-            "doesn't know", "no sabe", "no sabe.", "doesnot know", "doesn't know.", "doesn't know the reason.",
-            "does not know", "sin razón específica", "ninguna de las anteriores", "ninguno de los anteriores", 
-            "ninguno de los anteriores aplica", "no especificó"
-        ],
-
-        'Physical Appearance': [
-            'por su rostro', 'por la ropa que tenia puesta', 'por el pelo', 'apariencia física',
-            'fisico', 'por apariencia', 'por apariencia.', 'her physical appearance and she demanded respect',
-            'la participante fue discriminada por su físico cuando estuvo en sexto grado.',
-            'aspecto fisico', 'deformación en la boca', 'apariencia', 'por nariz', 'peso'
-        ],
-
-        'Education & Intellectual Capacity': [
-            'he was not a good student', 'subestimaron su capacidad', 'subestimaron su capacidad',
-            'sentimientos de superioridad debido a sus niveles de educación', 'nivel de estudios.',
-            'competencia profesional', 'porque los niños la molestaban sin razón', 'nivel educativo',
-            'prejuicio por nivel educativo', 'por sus notas.', 'por las notas', 'menosprecio a maestros de educación física',
-            'educación'
-        ],
-
-        'Housing & Social Status': [
-            'vivienda', 'vivían en casa grande. Tenían dinero.', 'situación socioeconómica.',
-            'por ser del barrio y por su condición de vih', 'estatus socioeconómico', 'estatus social',
-            'clases sociales', 'clase social', 'condición socioeconómica.'
-        ],
-
-        'Workplace Environment': [
-            'work related environment', 'situaciones laborales', 'condiciones laborales.', 'situaciones de trabajo',
-            'problemas en el trabajo', 'presión en el trabajo', 'conflictos laborales', 'condiciones de empleo'
-        ]}
-
-
-
-
-    # Flattening the dictionary for lookup
-    discrimination_map = {reason.lower().strip(): category 
-                          for category, reasons in discrimination_reasons_4.items() 
-                          for reason in reasons}
-
-    # Function to replace reasons with categories in a DataFrame column
-    def map_discrimination_to_category(df, column_name):
-        df[column_name] = df[column_name].astype(str).str.lower().str.strip().map(discrimination_map)
-        return df
-
-    df_hmz_sdoh_prospect= map_discrimination_to_category(df_hmz_sdoh_prospect, 'pdq4h1')
-
-
-
 
 
     # pdq4i1
@@ -2839,7 +2946,7 @@ def transform_sdoh(config):
     # --------------------------------------
 
     # Transformation 1: recoding 97, 98 as nan
-    base_variables = ["nfa10c", "nfa10d", "nfa10e", "nfa8u", "nfa8v", "nfa8w", "nfa8y"]
+    base_variables = ["nfa10a","nfa10b","nfa10c", "nfa10d", "nfa10e", "nfa8u", "nfa8v", "nfa8w", "nfa8y"]
 
     for var in base_variables:
         var_with_suffix = var + "_5yr"
@@ -2923,7 +3030,7 @@ def transform_sdoh(config):
     # --------------------------------------
     # BPRHS
     # --------------------------------------
-    base_variables = ["nfa7a", "nfa7b", "nfa7c", "nfa7d", "nfa7e", "nfa7g","nfa7h" "nfa8h"]
+    base_variables = ["nfa7a", "nfa7b", "nfa7c", "nfa7d", "nfa7e", "nfa7g","nfa7h", "nfa8h"]
 
 
     # Processing the bprhs v3
@@ -3244,16 +3351,73 @@ def transform_sdoh(config):
     df_hmz_sdoh_prospect_english = data['prospect_english']
 
 
-    # ------------------------------------------------------------------------------------------------
-    # ------------------------------------------------------------------------------------------------
+    # #------------------------------------------------------------------------------------------------
+    # # Days since visit 1
+    # #------------------------------------------------------------------------------------------------
+
+    # normalizing fields
+    key = df_hmz_sdoh_prospect_english["studyid"].astype(str)
+    events = (
+    df_hmz_sdoh_prospect_english["redcap_event_name"]
+    .astype(str)
+    .str.strip()
+    .str.lower())
+    
+    dates = pd.to_datetime(df_hmz_sdoh_prospect_english["gen1"], errors="coerce")
+
+    # keep only baseline & visit 2 rows with valid dates
+    keep_ev = ["baseline_arm_1", "visit_2_arm_1"]
+    sub = pd.DataFrame({"studyid": key, "event": events, "date": dates})
+    sub = sub[sub["event"].isin(keep_ev)].dropna(subset=["date"])
+
+    # earliest date per (studyid, event)
+    per_event = (
+    sub.groupby(["studyid", "event"], as_index=False, sort=False)["date"]
+    .min())
+
+    # compute baseline date per participant
+    wide = per_event.pivot(index="studyid", columns="event", values="date")
+    baseline = wide.get("baseline_arm_1")
+    baseline_map = baseline.to_dict() if isinstance(baseline, pd.Series) else {}
+
+    # new column and name
+    new_col = "hmz_days_since_visit_1_prospect"
+
+    # cleaning up
+    if "hmz_days_since_visit_1" in df_hmz_sdoh_prospect_english.columns and new_col not in df_hmz_sdoh_prospect_english.columns:
+        df_hmz_sdoh_prospect_english.rename( columns={"hmz_days_since_visit_1": new_col},
+        inplace=True )
+
+    if "hmz_sdoh_days_since_visit_1_prospect" in df_hmz_sdoh_prospect_english.columns:
+        df_hmz_sdoh_prospect_english.rename(columns={"hmz_sdoh_days_since_visit_1_prospect": new_col},
+        inplace=True)
+
+    # computing days since baseline
+    df_hmz_sdoh_prospect_english[new_col] = (
+    dates - key.map(baseline_map)).dt.days
+
+    # forcing baseline rows to 0
+    df_hmz_sdoh_prospect_english.loc[
+    events.eq("baseline_arm_1"),
+    new_col] = 0
+
+    # converting to nullable Int64
+    df_hmz_sdoh_prospect_english[new_col] = pd.to_numeric(
+    df_hmz_sdoh_prospect_english[new_col],
+    errors="coerce").astype("Int64")
+
+    # saving
+    df_hmz_sdoh_prospect_english.to_csv(
+    "data/intermediate/df_hmz_sdoh_prospect_english.csv",
+    index=False)
 
 
     # -------------------------------------------------------------------------------------------------
-    # Gender
+    # Sex
     # -------------------------------------------------------------------------------------------------
 
     # Renaming 
-    df_hmz_sdoh_prospect_english.rename(columns={'dem3': 'hmz_gender_prospect'}, inplace=True)
+    df_hmz_sdoh_prospect_english.rename(columns={'dem3': 'hmz_sex_prospect'}, inplace=True)
 
     # Saving 
     df_hmz_sdoh_prospect_english.to_csv('data/intermediate/df_hmz_sdoh_prospect_english.csv', index=False)
@@ -3330,53 +3494,43 @@ def transform_sdoh(config):
     #------------------------------------------------------------------------------------------------
     # Work History and Income
     # -----------------------------------------------------------------------------------------------
+    occupations_prospect_english = {
+    1: [],
+    2: ["Federal Government; ESL Specialist"],
+    3: [],
+    4: [],
+    5: [],
+    6: [],
+    7: [],
+    8: [],  # Armed Services 
+    9: [],
+    10: [],
+    11: [],
+    12: [],
+    13: [],
+    14: []}
 
 
-    occupations = {
-        1: ["Administrador", "Administradora", "Gerente", "Director", "Directora", "Coordinador", "Coordinadora",
-            "Secretaria", "Asistente administrativo", "Analista de presupuesto"],
-        2: ["Funcionario ejecutivo", "Policia", "Sargento", "Inspectora de contribuciones", "Oficial administrativo",
-            "Catedratico", "Profesor universitario", "Educador en salud", "Abogada", "Abogado"],
-        3: ["Enfermera", "Médico", "Farmaceutica", "Doctor", "Tecnologa Medica", "Terapista fisica", "Terapista Respiratoria",
-            "Psicologa", "Trabajadora social", "Consejera", "Nutricionista", "Paramédico", "Tecnica oftalmica"],
-        4: ["Maestro", "Maestra", "Profesor", "Profesora", "Tutor", "Tutora", "Asistente de maestra", "Educador",
-            "Facilitadora Docente", "Trabajadora Social Escolar"],
-        5: ["Técnico automotriz", "Técnico de refrigeración", "Electricista", "Tecnico de permisos", "Tecnólogo Médico",
-            "Técnica de biblioteca", "Técnico el reparación"],
-        6: ["Vendedor", "Ventas", "Cajera", "Call Center", "Servicio al cliente", "Consultora", "Representante de ventas",
-            "Agente de Seguros", "Tienda comercial", "Mercadeo"],
-        7: ["Empleada doméstica", "Ama de llaves", "Housekeeping", "Cuidadora de envejecientes", "Cuida ancianos",
-            "Niñera", "Cuidadora"],
-        8: [],  # Armed Services 
-        9: ["Agricultura", "Agronomo", "Farming", "Forestry"],
-        10: ["Handyman", "Mantenimiento", "Carpinteria", "Plomero", "Pintor", "Mecanico", "Contratista"],
-        11: ["Operador de equipo pesado", "Operador de manufactura", "Operador Multitrabajo", "Encargado de almacén"],
-        12: ["Chofer", "Transporte", "Uber", "Delivery", "Conductor"],
-        13: ["Limpieza", "Recolección de basura", "Trabajador general", "Auxiliar", "Mantenimiento de hogares"],
-        14: ["Artesana", "Artista", "Barbero", "Estilista", "Cocinero", "Reposteria", "Chef", "Dueño de negocio"]
-    }
-
-
-
-    def categorize_occupation(text):
+    def categorize_occupation_prospect_english(text):
         if pd.isna(text) or text.strip() == "":
-            return np.nan  
+            return np.nan
         text = text.lower()
-        for category, keywords in occupations.items():  # Using 'occupations' dictionary
+        for category, keywords in occupations_prospect_english.items():
             if any(keyword.lower() in text for keyword in keywords):
                 return category
-        return np.nan  
-
-    def transform_occupation(df, suffix):
-        col_name = f"whi7"  
-        df[f"hmz_whi_occupation_{suffix}"] = df[col_name].apply(categorize_occupation)  
+        return np.nan
 
 
-    transform_occupation(df_hmz_sdoh_prospect_english, "prospect")
+    def transform_occupation_prospect_english(df):
+        col_name = "whi7"
+        df["hmz_whi_occupation_prospect"] = df[col_name].apply(categorize_occupation_prospect_english)
 
 
-    df_hmz_sdoh_prospect_english.to_csv('data/intermediate/df_hmz_sdoh_prospect_english.csv', index=False)
+    transform_occupation_prospect_english(df_hmz_sdoh_prospect_english)
 
+    df_hmz_sdoh_prospect_english.to_csv(
+    "data/intermediate/df_hmz_sdoh_prospect_english.csv",
+    index=False)
 
 
     #------------------------------------------------------------------------------------------------
@@ -3867,7 +4021,7 @@ def transform_sdoh(config):
         "pdq1a", "pdq1b", "pdq1c", "pdq1d", "pdq1e", "pdq1f", "pdq1g", "pdq1h",
         "pdq2a", "pdq2b", "pdq2c", "pdq2d", "pdq2e", "pdq2f", "pdq2g", "pdq2h",
         "pdq2h1", "pdq3a", "pdq3b", "pdq3c", "pdq3d", "pdq3e", "pdq4a", "pdq4b",
-        "pdq4c", "pdq4d", "pdq4e", "pdq4f", "pdq4g", "pdq4h", "pdq4i", "pdq4h1",
+        "pdq4c", "pdq4d", "pdq4e", "pdq4f", "pdq4g", "pdq4h", "pdq4i",
         "pdq2i","pdq2j", "pdq4i1", "pdq4j"]
 
 
@@ -3879,143 +4033,14 @@ def transform_sdoh(config):
       # Saving
     df_hmz_sdoh_prospect_english.to_csv('data/intermediate/df_hmz_sdoh_prospect_english.csv', index=False)
       
-    # Categorizing
-    # pdq4h1
-    print(df_hmz_sdoh_prospect_english['pdq4h1'].value_counts())
-
-    discrimination_reasons_4 = {'Physical or Health-Related Conditions': [
-            'por el vih', 'hiv', 'por ser hiv', 'por ser HIV.', 'the participant is HIV positive',
-            'nepotismo y dado su aflicion de HIV', 'por tener espejuelos', 'problema de salud mental',
-            'condicion de salud mental', 'condicion fisica', 'por discapacidad', 'impedimento',
-            'impedimento.', 'por condición médica', 'por condición medica.', 'por condición medica, favoritismo, por falta de empatía',
-            'por condición de salud mental', 'porque los niños la molestaban sin razón', 'condiciones medicas',
-            'por su problema de audición.', 'problemas con la autoridad o con seguir ordenes dadas',
-            'problemas de salud-depresion', 'condición médica', 'diagnóstico medico', 'razones de salud',
-            'health issues', 'situación de salud', 'problemas de salud', 'condición socioeconómica y salud',
-            'debido a su diagnóstico de VIH', 'condición de salud en el trabajo'
-        ],
-    
-        'Bullying & Harassment': [
-            'bullying', 'bullying y prepotencia', 'bullying en la escuela', 'bullying de niños',
-            'bullying y problemas laborales', 'bullying y envidia', 'bullying y tacticas de abogados',
-            'bullying en la escuela', 'bulling en la escuela', 'bullying, diferencias laborales',
-            'sobrenombres', 'acoso', 'acoso en la escuela por ser estudiosa.', 'acoso de niño',
-            'preferencia de maestros a estudiantes', 'abuso de poder (gerente)', 'abuso de poder',
-            'tratan de minimizar a la participante', 'celos academicos'
-        ],
-
-        'Work-Related Issues': [
-            'work issues', 'nepotismo en su área de trabajo.', 'hostigamiento, más trabajo por igual paga',
-            'trabajo: personas malintencionadas', 'laboral conditions', 'malas condiciones laborales.',
-            'trabajo de ventas.', 'problemas laborales con situaciones interinas', 'maltrato en el sistema de salud',
-            'explotacion laboral', 'conflicto en el trabajo', 'puesto de trabajo y política', 
-            'competencia laboral; agencias gubernamentales la trataron como si fuera deshonesta y negligente..',
-            'su actitud.', 'conflicto en el trabajo como directora en empleo anterior',
-            'en el empleo, por excederse en sus responsabilidades.', 'condición de salud en el trabajo',
-            'presión social por parte de amistades', 'por su posicion en el trabajo', 'injusticias en proceso de vivienda',
-            'supervisora queria que hicieran las cosas tal y como ella decia', 'los demás se creían mejores. que la participante.'
-        ],
-
-        'Social & Personal Conflicts': [
-            'subestimacion', 'subrtimacion', 'por envidia', 'envidia', 'celos profesionales', 'celos profesionales en el trabajo',
-            'competencia', 'inteligencia percibida en la escuela(competencia) participante tiene un gemela',
-            'porque te ven como competencia', 'su actitud.', 'por la manera de ser', 'actitud general', 
-            'por su carácter.', 'problemas personales.', 'por probatoria', 'por su problema de audición.',
-            'actitudes', 'actitud.', 'personalidad jovial.', 'falta de madurez', 'presión social',
-            'envidia y celos', 'celos profesionales, religion.', 'diferencias en la sociedad', 'competencia entre profesionales',
-            'porque decian que era nerd', 'envy', 'competencia profesional', 'personalidad, chisme del trabajo',
-            'en el parto no dejaron que se pegara a su bebé.', 'envidia profesional.', 'falta de madurez (trabajo)/ medico (trato no profesional)'
-        ],
-
-        'Family & Domestic Issues': [
-            'familiares', 'personal relationship problems', 'problemas familiares', 'por su desesperacion',
-            'familiares', 'situaciones familiares', 'su prioridad son sus hijos y no le respetaban por eso',
-            'porque no le dieron oportunidad de vivir en un apartamento', 'porque no le dieron oportunidad de vivir en un apartamento'
-        ],
-
-        'Legal & Authority-Related Issues': [
-            'personal issues with police men', 'burocracia gubernamental.', 'burocracia del departamento de educacion',
-            'el patrono obstaculizó sus visitas al fondo de seguro del estado por lesión en el empleo',
-            'discriminado en el tribunal por problema en trabajo', 'injusticia', 'situaciones políticas',
-            'problemas con abogado de la otra parte', 'razones políticas.', 'razones de salud',
-            'injusticia familiar', 'secuestro infantil', 'impericia medica', 'despido injustificado',
-            'injusticias en proceso de vivienda', 'razones políticas.', 'razones politicas.', 'razones políticas.',
-            'presión social por parte de amistades'
-        ],
-
-        'Religious or Cultural Beliefs': [
-            'religion', 'religion y apariencia fisica', 'religious views', 'creencias religiosas', 
-            'afiliaciones religiosas', 'religión'
-        ],
-
-        'Economic or Financial Issues': [
-            'por la situación económica', 'por lo económico', 'estatus socioeconómico', 'status social',
-            'discriminado por el ingreso', 'estatus socioeconómico.', 'por ingresos', 'situaciones económicas y condiciones de salud',
-            'nivel económico, condiciones médicas', 'discriminacion por estatus socioeconomico'
-        ],
-
-        'Political Beliefs & Affiliations': [
-            'politica', 'política', 'situación política', 'por razones politicas', 'political affiliations',
-            'political differences', 'diferencias politicas', 'afiliación política', 'posturas politicas',
-            'motivos ideológicos.', 'afiliaciones políticas'
-        ],
-
-        'Doesn\'t Know / No Specific Reason': [
-            "doesn't know", "no sabe", "no sabe.", "doesnot know", "doesn't know.", "doesn't know the reason.",
-            "does not know", "sin razón específica", "ninguna de las anteriores", "ninguno de los anteriores", 
-            "ninguno de los anteriores aplica", "no especificó"
-        ],
-
-        'Physical Appearance': [
-            'por su rostro', 'por la ropa que tenia puesta', 'por el pelo', 'apariencia física',
-            'fisico', 'por apariencia', 'por apariencia.', 'her physical appearance and she demanded respect',
-            'la participante fue discriminada por su físico cuando estuvo en sexto grado.',
-            'aspecto fisico', 'deformación en la boca', 'apariencia', 'por nariz', 'peso'
-        ],
-
-        'Education & Intellectual Capacity': [
-            'he was not a good student', 'subestimaron su capacidad', 'subestimaron su capacidad',
-            'sentimientos de superioridad debido a sus niveles de educación', 'nivel de estudios.',
-            'competencia profesional', 'porque los niños la molestaban sin razón', 'nivel educativo',
-            'prejuicio por nivel educativo', 'por sus notas.', 'por las notas', 'menosprecio a maestros de educación física',
-            'educación'
-        ],
-
-        'Housing & Social Status': [
-            'vivienda', 'vivían en casa grande. Tenían dinero.', 'situación socioeconómica.',
-            'por ser del barrio y por su condición de vih', 'estatus socioeconómico', 'estatus social',
-            'clases sociales', 'clase social', 'condición socioeconómica.'
-        ],
-
-        'Workplace Environment': [
-            'work related environment', 'situaciones laborales', 'condiciones laborales.', 'situaciones de trabajo',
-            'problemas en el trabajo', 'presión en el trabajo', 'conflictos laborales', 'condiciones de empleo'
-        ]}
-
-
-
-
-    # Flattening the dictionary for lookup
-    discrimination_map = {reason.lower().strip(): category 
-                          for category, reasons in discrimination_reasons_4.items() 
-                          for reason in reasons}
-
-    # Function to replace reasons with categories in a DataFrame column
-    def map_discrimination_to_category(df, column_name):
-        df[column_name] = df[column_name].astype(str).str.lower().str.strip().map(discrimination_map)
-        return df
-
-    df_hmz_sdoh_prospect_english= map_discrimination_to_category(df_hmz_sdoh_prospect_english, 'pdq4h1')
-
-
+   
 
     #'pdq2h1'
     discrimination_reasons_6 = {
 
 
         'Social & Personal Conflicts': [
-            'Failed promises'
-        ]
+            'Failed promises']
     
     }
 
@@ -4132,18 +4157,6 @@ def transform_sdoh(config):
     }, inplace=True)
 
 
-
-    variables_to_check = [
-        'hmz_fss1_prospect', 'hmz_fss1a1_prospect', 'hmz_fss1a2_prospect',
-        'hmz_fss1a3_prospect', 'hmz_fss1a4_prospect', 'hmz_fss1a5_prospect',
-        'hmz_fss1a6_prospect', 'hmz_fss1b1_prospect', 'hmz_fss_time_shopping_prospect',
-        'hmz_fss_store_prospect', 'hmz_fss_diet_prospect',
-        'hmz_food_running_out_prospect', 'hmz_food_not_lasting_prospect',
-        'hmz_food_balanced_meals_prospect', 'hmz_food_size_meals_prospect',
-        'hmz_food_size_meals_often_prospect', 'hmz_food_eat_less_prospect',
-        'hmz_food_no_eat_prospect', 'hmz_food_lose_weight_prospect',
-        'hmz_food_no_eat_full_day_prospect', 'hmz_food_no_eat_full_day_often_prospect'
-    ]
 
 
     # Saving

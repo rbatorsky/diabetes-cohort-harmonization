@@ -1,7 +1,8 @@
 import pandas as pd
+import os
 
 # ----------------------------------------------------------
-# Helper Functions (decoding bytes and checking duplicates)
+# Helper Functions 
 # ----------------------------------------------------------
 
 def decode_bytes(df):
@@ -26,16 +27,31 @@ def check_duplicates(df, name):
             print(f"No duplicates in {name}.")
     else:
         print(f"No 'studyid' column in {name}.")
+        
+
+def load_table(path, **csv_kwargs):
+
+    ext = os.path.splitext(path)[1].lower()
+
+    if ext in [".sas7bdat", ".xpt"]:
+        df = pd.read_sas(path)
+    elif ext == ".csv":
+        df = pd.read_csv(path, **csv_kwargs) 
+    else:
+        raise ValueError(f"Unsupported file extension '{ext}' for path: {path}")
+
+    return df
 
 # -------------------------------
 # Spanish Loader
 # -------------------------------
 
 def load_sdoh_spanish_data(config):
-    df_bprhs_0 = pd.read_sas(config["bprhs_v1"])
-    df_bprhs_2 = pd.read_sas(config["bprhs_v2"])
-    df_bprhs_5 = pd.read_sas(config["bprhs_v3"])
-    df_bprhs_8 = pd.read_sas(config["bprhs_v4"])
+    df_bprhs_0 = load_table(config["bprhs_v1"])
+    df_bprhs_2 = load_table(config["bprhs_v2"])
+    df_bprhs_5 = load_table(config["bprhs_v3"])
+    df_bprhs_8 = load_table(config["bprhs_v4"])
+
 
     for df in [df_bprhs_0, df_bprhs_2, df_bprhs_5, df_bprhs_8]:
         df.columns = df.columns.str.lower().str.strip()
@@ -50,17 +66,40 @@ def load_sdoh_spanish_data(config):
     for name, df in bprhs_dfs.items():
         check_duplicates(df, name)
 
-    duplicate_ids = [0.0, 0.0]
-    for studyid in duplicate_ids:
-        idx = df_bprhs_8[df_bprhs_8['studyid'] == studyid].index
-        if len(idx) > 1:
-            df_bprhs_8 = df_bprhs_8.drop(idx[1:])
+    if 'studyid' in df_bprhs_8.columns:
+        dup_mask = df_bprhs_8.duplicated(subset='studyid', keep='first')
+        n_dropped = dup_mask.sum()
+        if n_dropped > 0:
+            print(f"\n[bprhs_8 - SDOH] Dropping {n_dropped} duplicate row(s) based on studyid (keeping first occurrence).")
+            df_bprhs_8 = df_bprhs_8.loc[~dup_mask].copy()
     bprhs_dfs["bprhs_8"] = df_bprhs_8
 
     for name, df in bprhs_dfs.items():
         check_duplicates(df, name)
 
     df_prospect = pd.read_csv(config["sdoh_prospect_spanish"], encoding='ISO-8859-1')
+
+# Excluding invalid studyids
+    if {"studyid", "exclude___1", "redcap_event_name"}.issubset(df_prospect.columns):
+        before = len(df_prospect)
+
+        ev = df_prospect["redcap_event_name"].astype(str).str.lower()
+        base_mask = df_prospect["exclude___1"] == 1
+
+        # baseline_arm_1 → PROSPECT visit 1
+        # visit_2_arm_1  → PROSPECT visit 2
+        v1_mask = base_mask & ev.str.contains("baseline_arm_1")
+        v2_mask = base_mask & ev.str.contains("visit_2_arm_1")
+
+        drop_mask = v1_mask | v2_mask
+
+        df_prospect = df_prospect.loc[~drop_mask].copy()
+
+        dropped = before - len(df_prospect)
+        print(f"[load_sdoh_spanish] Excluded {dropped} PROSPECT SDOH row(s) based on exclude___1.")
+    else:
+        print("[load_sdoh_spanish] WARNING: exclude___1 / redcap_event_name not found in PROSPECT SDOH file.")
+
 
     total = df_prospect['studyid'].count()
     unique = df_prospect['studyid'].nunique()
@@ -84,7 +123,7 @@ def load_sdoh_spanish_data(config):
 # -------------------------------
 
 def load_sdoh_english_data(config):
-    df_eng = pd.read_csv(config["sdoh_prospect_english"], encoding='ISO-8859-1')
+    df_eng = load_table(config["sdoh_prospect_english"], encoding='ISO-8859-1')  # <<< CHANGED
 
     total = df_eng['studyid'].count()
     unique = df_eng['studyid'].nunique()
@@ -100,6 +139,7 @@ def load_sdoh_english_data(config):
     convert_all_numeric_to_float(df_eng)
 
     return {"prospect_english": df_eng}
+
 
 # -------------------------------
 # Loader Function

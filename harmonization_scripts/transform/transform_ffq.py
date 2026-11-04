@@ -4,7 +4,7 @@ def transform_ffq(config):
 
     import pandas as pd
     import numpy as np
-    import os
+  
    
     #------------------------------------------------------------------------------------------------
     # Loading the data: Spanish
@@ -19,7 +19,7 @@ def transform_ffq(config):
     df_hmz_ffq_bprhs_5 = data['bprhs_5']
     df_hmz_ffq_bprhs_8 = data['bprhs_8']
     df_hmz_ffq_prospect = data['prospect']
-    df_ffq_nutrients_prospect = pd.read_csv(config["ffq_prospect_perday_full"], encoding='latin1')
+    df_ffq_nutrients_prospect = data["prospect_nutrients"]
 
    
 
@@ -1194,7 +1194,7 @@ def transform_ffq(config):
     
 
     # ------------------------------------------------------------------------------------------------------------
-    # Merging nutrients data (Tufts) into each PROSPECT visit
+    # Transformation: Merging nutrients data (Tufts) into each PROSPECT visit
     # ------------------------------------------------------------------------------------------------------------
 
 

@@ -336,7 +336,7 @@ na_f  ,seri_f_w2  ,sorb_f_w3  ,rfcaf,pdq3d
 mg_f  ,thre_f_w2  ,xyli_f_w3  ,rfash,pdq3e
 mn_f  ,tryp_f_w2  ,acho_f_w3  ,rfw,pdq4a
 se_f  ,alan_f_w2  ,asugar_f_w3  ,rfnitrogen,pdq4b
-zn_f  ,argi_f_w2  ,sucl_f_w3  ,,pdq4c
+zn_f  ,argi_f_w2  ,sucl_f_w3  ,vis4_dt_8yr,pdq4c
 p_f  ,aspa_f_w2  ,acesk_f_w3  ,,pdq4d
 s04_0_f  ,tyro_f_w2  ,oxal_f_w3  ,,pdq4e
 s06_0_f  ,vali_f_w2  ,phyt_f_w3  ,,pdq4f
@@ -345,7 +345,7 @@ s10_0_f  ,aspt_f_w2  ,caf_f_w3  ,,pdq4h
 s12_0_f  ,glyt_f_w2  ,ash_f_w3  ,,pdq4i
 s14_0_f  ,coum_f_w2  ,w_f_w3  ,,pdq4i1
 s16_0_f  ,daid_f_w2  ,nitrogen_f_w3,,pdq2i
-s17_0_f  ,betaine_f_w2  ,,,pdq2i1
+s17_0_f  ,betaine_f_w2  ,vis3_dt_5yr,,pdq2i1
 s18_0_f  ,bioa_f_w2  ,,,pdq4j
 s20_0_f  ,formon_f_w2  ,,,fss1
 s22_0_f  ,geni_f_w2  ,,,fss1a_1
@@ -367,7 +367,7 @@ f182t_f  ,caf_f_w2  ,,,summary20
 ttfa_f  ,ash_f_w2  ,,,supyn
 omega3_f  ,w_f_w2  ,,,supdur1
 cyst_f  ,nitrogen_f_w2,,,supdur2
-glut_f  ,,,,supdur3
+glut_f  ,vis2_dt_2yr,,,supdur3
 glyc_f  ,,,,supdur4
 isol_f  ,,,,supdur5
 hist_f  ,,,,supdur6
@@ -411,7 +411,7 @@ caf_f  ,,,,rfpect
 ash_f  ,,,,rfva
 w_f  ,,,,rfacar
 nitrogen_f,,,,rfbceq
-,,,,rfbcar
+vis1_dt,,,,rfbcar
 ,,,,rfrl
 ,,,,rfvarae
 ,,,,rfvare
@@ -524,3 +524,4 @@ nitrogen_f,,,,rfbceq
 ,,,,rfash
 ,,,,rfw
 ,,,,rfnitrogen
+,,,,gen1

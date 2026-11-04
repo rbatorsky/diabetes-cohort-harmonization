@@ -1,7 +1,7 @@
 
 
 # -------------------------
-# BPRHS Raw Files
+# BPRHS Files
 # -------------------------
 bprhs_v1: data/raw/bprhs/fullbaseline_03jan2018.sas7bdat
 bprhs_v2: data/raw/bprhs/full2yr_19nov2018.sas7bdat
@@ -16,10 +16,10 @@ ffq_bprhs_v4: data/raw/bprhs/eightyear_ffq_per_day_121323.sas7bdat
 
 
 # -------------------------
-# PROSPECT Raw Files
+# PROSPECT Files
 # -------------------------
 
-# FFQ raw data files
+# FFQ data files
 ffq_prospect_spanish: data/raw/prospect/PROSPECT5FFQ_Spanish_raw_09MAY2024(in).csv
 ffq_prospect_english: data/raw/prospect/PROSPECT5aFFQ_English_raw_09MAY2024(in).csv
 ffq_prospect_perday_full: data/raw/prospect/ffq_perday_perfood659_all_copy_Tufts.csv
@@ -30,10 +30,16 @@ ffq_prospect_perday_v2: data/raw/prospect/twoyear_ffq_per_day_011922.sas7bdat
 ffq_prospect_perday_v3: data/raw/prospect/fiveyear_ffq_per_day_062223.sas7bdat
 ffq_prospect_perday_v4: data/raw/prospect/eightyear_ffq_per_day_121323.sas7bdat
 
-# Health raw data
+
+# Health data
 health_prospect_spanish: data/raw/prospect/PROSPECT4_DATA_SPANISH_VISITS1&2__2024-11-26_1522.csv
 health_prospect_english: data/raw/prospect/PROSPECT4a_DATA_ENGLISH_VISITS1&2_2024-11-26_1523.csv
 
-# SDOH raw data
+# SDOH data
 sdoh_prospect_spanish: data/raw/prospect/PROSPECT4_DATA_SPANISH_VISITS1&2__2024-11-26_1522.csv
 sdoh_prospect_english: data/raw/prospect/PROSPECT4a_DATA_ENGLISH_VISITS1&2_2024-11-26_1523.csv
+
+# -------------------------
+# Output
+# -------------------------
+merged_output_filename: df_hmz_bprhs_prospect_2026.csv

@@ -82,3 +82,5 @@ def check_required_variables(config):
             )
         else:
             print(f"  All required variables found for '{column_name}'.")
+            
+            

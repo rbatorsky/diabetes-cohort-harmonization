@@ -1,5 +1,6 @@
-import os
+import os 
 import pandas as pd
+
 
 def assign_cohort_and_visit(df_name, df):
     cohort, visit = None, None
@@ -28,6 +29,9 @@ def drop_redundant_columns(df_list):
         "hmz_record_id_prospect_x", "hmz_record_id_prospect_y"
     ]
     return [df.drop(columns=cols_to_drop, errors="ignore") for df in df_list]
+
+
+
 
 def process_transformed_data(transformed_data):
     suffix_map = {
@@ -59,43 +63,74 @@ def inspect_key_multiples(df, label):
     else:
         print(f"[{label}] Skipped key inspection - missing key columns.")
 
-def merge_transformed_data(transformed_data):
+
+def merge_transformed_data(transformed_data, config=None):
     transformed_data = process_transformed_data(transformed_data)
 
-    # Apply cohort/visit assignment BEFORE inspections
     df_sdoh = [assign_cohort_and_visit(name, df) for name, df in transformed_data["sdoh"].items()]
     df_health = [assign_cohort_and_visit(name, df) for name, df in transformed_data["health"].items()]
     df_ffq = [assign_cohort_and_visit(name, df) for name, df in transformed_data["ffq"].items()]
- 
+
     df_sdoh = drop_redundant_columns(df_sdoh)
     df_health = drop_redundant_columns(df_health)
     df_ffq = drop_redundant_columns(df_ffq)
 
+
     print("Inspecting uniqueness BEFORE merging:")
-    for df, label in zip([df_sdoh, df_health, df_ffq], ['SDOH', 'Health', 'FFQ']):
-        combined = pd.concat(df, ignore_index=True)
+    for df_list, label in zip([df_sdoh, df_health, df_ffq], ['SDOH', 'Health', 'FFQ']):
+        combined = pd.concat(df_list, ignore_index=True)
         inspect_key_multiples(combined, label)
 
     merged_df_sdoh = pd.concat(df_sdoh, ignore_index=True)
     merged_df_health = pd.concat(df_health, ignore_index=True)
     merged_df_ffq = pd.concat(df_ffq, ignore_index=True)
-    
+
     print("merged_df_sdoh dtypes:\n", merged_df_sdoh.dtypes[['studyid', 'cohort', 'visit']])
     print("merged_df_health dtypes:\n", merged_df_health.dtypes[['studyid', 'cohort', 'visit']])
     print("merged_df_ffq dtypes:\n", merged_df_ffq.dtypes[['studyid', 'cohort', 'visit']])
 
+    merged_df = merged_df_sdoh.merge(
+        merged_df_health,
+        on=["studyid", "cohort", "visit"],
+        how="outer"
+    )
+    hmz_df = merged_df.merge(
+        merged_df_ffq,
+        on=["studyid", "cohort", "visit"],
+        how="outer")
 
-    merged_df = merged_df_sdoh.merge(merged_df_health, on=["studyid", "cohort", "visit"], how="outer")
-    hmz_df = merged_df.merge(merged_df_ffq, on=["studyid", "cohort", "visit"], how="outer")
+    if "hmz_sdoh_days_since_visit_1" in hmz_df.columns:
+        hmz_df.rename(columns={"hmz_sdoh_days_since_visit_1": "hmz_days_since_visit_1"}, inplace=True)
 
     print("Inspecting uniqueness AFTER merging:")
     inspect_key_multiples(hmz_df, "Final merged")
 
+
+    hmz_df = hmz_df.sort_values(["cohort", "visit", "studyid", ]).reset_index(drop=True)
+
     output_dir = os.path.join("data", "output")
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, "df_hmz_bprhs_prospect_2025.csv")
+
+    
+    default_name = "df_hmz_bprhs_prospect_2025.csv"
+    if config is not None and "merged_output_filename" in config:
+        output_name = config["merged_output_filename"]
+    else:
+        output_name = default_name
+
+    output_path = os.path.join(output_dir, output_name)
+    
+
     hmz_df.to_csv(output_path, index=False, encoding="utf-8")
 
     print(f"Final merged dataset shape: {hmz_df.shape}")
     print(f"Final merged dataset saved to {output_path}")
     return hmz_df
+
+
+
+def run_merging(transformed_data, config):
+    return merge_transformed_data(transformed_data, config=config)
+
+
+
