@@ -166,17 +166,6 @@ ffq_raw = read.xlsx("../../data/prospect/data_13may24/csv/PROSPECT5_FFQ_DATA_RAW
 ffq_raw_e = read.xlsx("../../data/prospect/data_13may24/csv/PROSPECT5a_FFQ_DATA_RAW_English_VISITS1&2_2024-11-26.xlsx")
 
 
-ids <- c(
-  "0","0","0","0","0",
-  "0","0","0","0","0",
-  "0","0","0","0","0",
-  "0","0","0","0","0",
-  "0"
-)
-
-intersect(ffq_raw$studyid, ids)
-intersect(ffq_raw_e$studyid, ids)
-
 
 
 
@@ -212,14 +201,6 @@ ca_raw_sum_out = ca_raw %>%
   inner_join(ca_out, by=c("studyid","visit"))
 
 
-test = ca_raw %>%
-  filter(studyid == "0")
-
-test1 = ca_raw %>%
-  filter(studyid == "0")
-
-view(test1)
-
 
 # vb6 ----
 
@@ -234,12 +215,4 @@ ca_raw_sum_out = ca_raw %>%
   summarise(ca_sum = sum(rfca)) %>%
   inner_join(ca_out, by=c("studyid","visit"))
 
-
-test = ca_raw %>%
-  filter(studyid == "0")
-
-test1 = ca_raw %>%
-  filter(studyid == "0")
-
-view(test1)
 

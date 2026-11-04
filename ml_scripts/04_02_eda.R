@@ -607,9 +607,6 @@ corr_diffmod
 to_select = unique(ffq_h_key$prospect_ffq_raw[!is.na(ffq_h_key$prospect_ffq_raw)])
 
 # note there are some suplicates, we will pick the max redcapid for a given studyid, visit
-#dup_studyid=c('0','0')
-#data_p_1s_dup = read.xlsx("data/prospect/data_13may24/csv/PROSPECT5_FFQ_DATA_RAW_Spanish_VISITS1&2_2024-11-26.xlsx") %>%
-#  filter(studyid %in% dup_studyid)
 
 data_p_1s = read.xlsx("data/prospect/data_13may24/csv/PROSPECT5_FFQ_DATA_RAW_Spanish_VISITS1&2_2024-11-26.xlsx") %>%
   group_by(studyid, redcap_event_name) %>%
