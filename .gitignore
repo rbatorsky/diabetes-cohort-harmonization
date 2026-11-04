@@ -17,3 +17,21 @@ ml_scripts/ml_scripts.Rproj
 
 # Local debug scratch script
 ml_scripts/debug.R
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# macOS
+.DS_Store
+
+# Data: raw inputs (real or synthetic) and pipeline outputs are never committed;
+# only the placeholder READMEs are tracked
+data/raw/*/*
+!data/raw/*/README.md
+data/intermediate/*
+!data/intermediate/README.md
+data/output/*
+!data/output/README.md
