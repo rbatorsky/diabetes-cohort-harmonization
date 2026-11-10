@@ -27,11 +27,16 @@ venv/
 # macOS
 .DS_Store
 
-# Data: raw inputs (real or synthetic) and pipeline outputs are never committed;
-# only the placeholder READMEs are tracked
-data/raw/*/*
-!data/raw/*/README.md
-data/intermediate/*
-!data/intermediate/README.md
-data/output/*
-!data/output/README.md
+# Data: original data and pipeline outputs are never committed;
+# only the placeholder READMEs and the synthetic input files are tracked
+pipeline/data/raw/*/*
+!pipeline/data/raw/*/README.md
+pipeline_synthetic_data/data/raw/*/*
+!pipeline_synthetic_data/data/raw/*/synthetic_*.csv
+*/data/intermediate/*
+!*/data/intermediate/README.md
+*/data/output/*
+!*/data/output/README.md
+
+# File created when the variable check fails
+missing_vars_*.txt

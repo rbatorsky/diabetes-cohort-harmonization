@@ -1,0 +1,5 @@
+# Python >= 3.10
+pandas
+numpy
+pyreadstat
+pyyaml
